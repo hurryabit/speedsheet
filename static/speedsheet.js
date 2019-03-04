@@ -19,7 +19,7 @@ $(document).ready(function() {
     $(this).addClass('table-primary');
 
     // Copy cell value into input field.
-    $('#formula').val($(this).text());
+    $('#formula').val($(this).attr('data-title'));
   });
 
   // $('#formula_form').on('submit', function(event) {

@@ -38,7 +38,7 @@
               <tr>
                 <th scope="row">{{this.row}}</th>
                 {{#each this.cells}}
-                <td id="{{this.name}}" {{#if this.active}}class="table-primary"{{/if}} data-toggle="tooltip" data-placement="right" title="{{this.formula}}">{{this.value}}</td>
+                <td id="{{this.name}}" {{#if this.active}}class="table-primary"{{/if}} data-toggle="tooltip" data-placement="right" data-title="{{this.formula}}">{{this.value}}</td>
                 {{/each}}
               </tr>
               {{/each}}
