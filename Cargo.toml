@@ -1,0 +1,21 @@
+[package]
+name = "SpeedSheet"
+version = "0.0.0"
+authors = ["Martin Huschenbett <martin.huschenbett@posteo.me>"]
+edition = "2018"
+build = "build.rs"
+
+[build-dependencies]
+peg = "0.5.7"
+
+[dependencies]
+peg = "0.5.7"
+rocket = "0.4.0"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+
+[dependencies.rocket_contrib]
+version = "0.4.0"
+default-features = false
+features = ["handlebars_templates", "serve"]

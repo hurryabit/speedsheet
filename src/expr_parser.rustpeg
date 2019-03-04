@@ -1,0 +1,13 @@
+use crate::sheet::Expr;
+use crate::sheet::Binop;
+
+
+pub expr -> Expr = #infix<atom> {
+  #L x "+" y { Expr::binop(Binop::Add, x, y) }
+     x "-" y { Expr::binop(Binop::Sub, x, y) }
+  #L x "*" y { Expr::binop(Binop::Mul, x, y) }
+}
+
+atom -> Expr
+  = n:$([0-9]+) { Expr::Int(n.parse().unwrap()) }
+  / x:$([A-Z][0-9]+) { Expr::Var(x.parse().unwrap()) }
