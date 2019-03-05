@@ -1,0 +1,10 @@
+{
+  "name": "speedsheet",
+  "version": "0.0.1",
+  "description": "Never wait for your calculations again.",
+  "main": "speedsheet.js",
+  "author": "Martin Huschenbett <martin.huschenbett@posteo.me",
+  "dependencies": {
+    "@types/jquery": "^3.3.29"
+  }
+}
