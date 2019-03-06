@@ -1,26 +1,28 @@
 // Handler for clicking on cells.
 function onActivateCell(newCoord) {
-    var newCell = $('#' + newCoord);
+    var newCell = $("#" + newCoord);
     // Get old coordinate and set new coordinate.
-    var oldCoord = ($('#coord').val());
-    $('#coord').val(newCoord);
+    var oldCoord = $("#coord").val();
+    $("#coord").val(newCoord);
     // Adjust highlighted cell.
-    if (!(oldCoord === '')) {
-        $('#' + oldCoord).removeClass('table-primary');
+    if (!(oldCoord === "")) {
+        $("#" + oldCoord).removeClass("table-primary");
     }
-    newCell.addClass('table-primary');
+    newCell.addClass("table-primary");
     // Copy cell value into input field.
-    $('#formula').val(newCell.attr('data-formula'));
+    $("#formula").val(newCell.attr("data-formula"));
 }
 // Do this when everthing is loaded.
 $(document).ready(function () {
     // Make log window as big as table.
-    $('#log').outerHeight($('#sheet').outerHeight());
+    $("#log").outerHeight($("#sheet").outerHeight());
     // Install handler for clicking on table cells.
-    $('td').on('click', function () { onActivateCell(this.id); });
-    // $('#formula_form').on('submit', function(event) {
+    $("td").on("click", function (event) {
+        onActivateCell(event.target.id);
+    });
+    // $("#formula_form").on("submit", function(event) {
     //   event.preventDefault();
-    //   var coord = $('#coord').val();
-    //   $('#' + coord).text($('#formula').val());
+    //   var coord = $("#coord").val();
+    //   $("#" + coord).text($("#formula").val());
     // });
 });
