@@ -1,3 +1,6 @@
+const KEY_ENTER: number = 13;
+const KEY_ESCAPE: number = 27;
+
 // Handler for clicking on cells.
 function onSelectCell(event: Event) {
     const newCell: JQuery<Element> = $(event.target as Element);
@@ -27,7 +30,7 @@ function onEditCell(event: Event) {
 }
 
 function onKeypressCell(event) {
-    if (event.which === 13) {
+    if (event.which === KEY_ENTER) {
         $(event.target).dblclick();
     }
 }
@@ -47,7 +50,7 @@ $(document).ready(() => {
     });
 
     $("#formula").on("keypress", (event) => {
-        if (event.which === 27) {
+        if (event.which === KEY_ESCAPE) {
             const coord: string = $("#coord").val() as string;
             $("#" + coord).click();
             event.preventDefault();
