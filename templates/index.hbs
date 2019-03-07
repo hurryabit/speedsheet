@@ -45,8 +45,8 @@
             </tbody>
           </table>
 
-          <form id="formula_form" action="/update" method="post">
-            <input id="coord" name="coord" type="hidden" value="">
+          <form id="formula_form" action="/update" method="post"><fieldset id="formula_fieldset" disabled>
+            <input id="coord" name="coord" type="hidden" value="{{selected_coord}}">
             <div class="input-group">
               <div class="input-group-prepend">
                 <span class="input-group-text">f(x)=</span>
@@ -56,7 +56,7 @@
                 <button id="enter" class="btn btn-primary" type="submit">Enter</button>
               </div>
             </div>
-          </form>
+          </fieldset></form>
 
         </div>
         <div class="col-3">

@@ -1,5 +1,5 @@
 [package]
-name = "SpeedSheet"
+name = "speedsheet"
 version = "0.0.0"
 authors = ["Martin Huschenbett <martin.huschenbett@posteo.me>"]
 edition = "2018"

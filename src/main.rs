@@ -9,7 +9,7 @@ extern crate rocket_contrib;
 use std::sync::Mutex;
 use std::vec::Vec;
 
-use rocket::Request;
+use rocket::http::uri::Uri;
 use rocket::response::Redirect;
 use rocket::response::status::BadRequest;
 use rocket::request::Form;
@@ -68,15 +68,21 @@ impl SheetView {
 #[derive(Serialize)]
 struct View {
   sheet_view: SheetView,
+  selected_coord: Option<String>,
 }
 
 type AppState<'r> = State<'r, Mutex<Sheet>>;
 
-#[get("/")]
-fn index(app_state: AppState) -> Template {
+#[derive(FromForm, UriDisplayQuery)]
+struct IndexParams {
+  select: Option<String>,
+}
+
+#[get("/?<params..>")]
+fn index(app_state: AppState, params: Form<IndexParams>) -> Template {
   let sheet = &app_state.lock().unwrap();
   let sheet_view = SheetView::from_sheet(sheet);
-  let view = View { sheet_view };
+  let view = View { sheet_view, selected_coord: params.select.clone(), };
   Template::render("index", &view)
 }
 
@@ -92,7 +98,8 @@ fn update(app_state: AppState, form: Form<Update>) -> Result<Redirect, BadReques
   let expr = form.formula.parse::<Expr>().map_err(|e| BadRequest(Some(e.to_string())))?;
   let sheet = &mut app_state.lock().unwrap();
   sheet.set(&coord, expr);
-  Ok(Redirect::to("/"))
+  let redirect: Uri = uri!(index: params = IndexParams { select: Some(coord.to_string()) }).into();
+  Ok(Redirect::to(redirect))
 }
 
 fn rocket() -> rocket::Rocket {

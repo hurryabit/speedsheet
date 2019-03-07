@@ -1,6 +1,6 @@
 {
   "name": "speedsheet",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Never wait for your calculations again.",
   "main": "speedsheet.js",
   "author": "Martin Huschenbett <martin.huschenbett@posteo.me",
