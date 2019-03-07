@@ -1,5 +1,5 @@
 // Handler for clicking on cells.
-function onActivateCell(newCoord) {
+function onSelectCell(newCoord) {
     var newCell = $("#" + newCoord);
     // Get old coordinate and set new coordinate.
     var oldCoord = $("#coord").val();
@@ -15,7 +15,7 @@ function onActivateCell(newCoord) {
     $("#formula_fieldset").prop("disabled", true);
 }
 function onEditCell(coord) {
-    onActivateCell(coord);
+    onSelectCell(coord);
     $("#formula_fieldset").prop("disabled", false);
     $("#formula").focus();
 }
@@ -27,7 +27,7 @@ $(document).ready(function () {
     $("td").each(function (_, cell) {
         $(cell).prop("tabindex", -1);
         $(cell).on("click", function (event) {
-            onActivateCell(event.target.id);
+            onSelectCell(event.target.id);
         });
         $(cell).on("dblclick", function (event) {
             onEditCell(event.target.id);
@@ -41,13 +41,13 @@ $(document).ready(function () {
     $("#formula").on("keypress", function (event) {
         if (event.which === 27) {
             var coord = $("#coord").val();
-            onActivateCell(coord);
+            onSelectCell(coord);
             event.preventDefault();
         }
     });
     var initCoord = $("#coord").val();
     if (initCoord !== "") {
-        onActivateCell(initCoord);
+        onSelectCell(initCoord);
     }
     // $("#formula_form").on("submit", function(event) {
     //   event.preventDefault();
