@@ -1,6 +1,7 @@
 // Handler for clicking on cells.
-function onSelectCell(newCoord) {
-    var newCell = $("#" + newCoord);
+function onSelectCell(event) {
+    var newCell = $(event.target);
+    var newCoord = newCell.prop("id");
     // Get old coordinate and set new coordinate.
     var oldCoord = $("#coord").val();
     $("#coord").val(newCoord);
@@ -14,10 +15,15 @@ function onSelectCell(newCoord) {
     $("#formula").val(newCell.attr("data-formula"));
     $("#formula_fieldset").prop("disabled", true);
 }
-function onEditCell(coord) {
-    onSelectCell(coord);
+function onEditCell(event) {
+    onSelectCell(event);
     $("#formula_fieldset").prop("disabled", false);
     $("#formula").focus();
+}
+function onKeypressCell(event) {
+    if (event.which === 13) {
+        $(event.target).dblclick();
+    }
 }
 // Do this when everthing is loaded.
 $(document).ready(function () {
@@ -26,28 +32,20 @@ $(document).ready(function () {
     // Install handler for clicking on table cells.
     $("td").each(function (_, cell) {
         $(cell).prop("tabindex", -1);
-        $(cell).on("click", function (event) {
-            onSelectCell(event.target.id);
-        });
-        $(cell).on("dblclick", function (event) {
-            onEditCell(event.target.id);
-        });
-        $(cell).on("keypress", function (event) {
-            if (event.which === 13) {
-                onEditCell(event.target.id);
-            }
-        });
+        $(cell).on("click", onSelectCell);
+        $(cell).on("dblclick", onEditCell);
+        $(cell).on("keypress", onKeypressCell);
     });
     $("#formula").on("keypress", function (event) {
         if (event.which === 27) {
             var coord = $("#coord").val();
-            onSelectCell(coord);
+            $("#" + coord).click();
             event.preventDefault();
         }
     });
     var initCoord = $("#coord").val();
     if (initCoord !== "") {
-        onSelectCell(initCoord);
+        $("#" + initCoord).click();
     }
     // $("#formula_form").on("submit", function(event) {
     //   event.preventDefault();

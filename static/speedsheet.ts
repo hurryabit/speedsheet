@@ -1,6 +1,7 @@
 // Handler for clicking on cells.
-function onSelectCell(newCoord: string) {
-    const newCell: JQuery<HTMLElement> = $("#" + newCoord);
+function onSelectCell(event: Event) {
+    const newCell: JQuery<Element> = $(event.target as Element);
+    const newCoord = newCell.prop("id");
 
     // Get old coordinate and set new coordinate.
     const oldCoord: string = $("#coord").val() as string;
@@ -19,10 +20,16 @@ function onSelectCell(newCoord: string) {
     $("#formula_fieldset").prop("disabled", true);
 }
 
-function onEditCell(coord: string) {
-    onSelectCell(coord);
+function onEditCell(event: Event) {
+    onSelectCell(event);
     $("#formula_fieldset").prop("disabled", false);
     $("#formula").focus();
+}
+
+function onKeypressCell(event) {
+    if (event.which === 13) {
+        $(event.target).dblclick();
+    }
 }
 
 // Do this when everthing is loaded.
@@ -34,30 +41,22 @@ $(document).ready(() => {
     $("td").each((_, cell) => {
         $(cell).prop("tabindex", -1);
 
-        $(cell).on("click", (event: Event) => {
-            onSelectCell((event.target as Element).id);
-        });
-        $(cell).on("dblclick", (event: Event) => {
-            onEditCell((event.target as Element).id);
-        });
-        $(cell).on("keypress", (event) => {
-            if (event.which === 13) {
-                onEditCell((event.target as Element).id);
-            }
-        });
+        $(cell).on("click", onSelectCell);
+        $(cell).on("dblclick", onEditCell);
+        $(cell).on("keypress", onKeypressCell);
     });
 
     $("#formula").on("keypress", (event) => {
         if (event.which === 27) {
             const coord: string = $("#coord").val() as string;
-            onSelectCell(coord);
+            $("#" + coord).click();
             event.preventDefault();
         }
     });
 
     const initCoord: string = $("#coord").val() as string;
     if (initCoord !== "") {
-      onSelectCell(initCoord);
+      $("#" + initCoord).click();
     }
 
     // $("#formula_form").on("submit", function(event) {
