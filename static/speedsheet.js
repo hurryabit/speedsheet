@@ -84,9 +84,48 @@ $(document).ready(function () {
     });
     var initCoord = $("#coord").val();
     $("#" + initCoord).click();
+    $("#check").click(function () {
+        $("#formula").focus();
+        $.ajax({
+            data: $("#formula_form").serializeArray(),
+            dataType: "json",
+            url: "check"
+        })
+            .done(function (data) {
+            switch (data.kind) {
+                case "Ok": {
+                    alert("all good");
+                    break;
+                }
+                case "Err": {
+                    alert(data.err);
+                    break;
+                }
+                default: impossible(data);
+            }
+        })
+            .fail(function (xhr, status, error) { alert("Connection to server failed: " + error); });
+    });
     // $("#formula_form").on("submit", function(event) {
     //   event.preventDefault();
     //   var coord = $("#coord").val();
     //   $("#" + coord).text($("#formula").val());
     // });
 });
+var Ok = /** @class */ (function () {
+    function Ok(ok) {
+        this.kind = "Ok";
+        this.ok = ok;
+    }
+    return Ok;
+}());
+var Err = /** @class */ (function () {
+    function Err(err) {
+        this.kind = "Err";
+        this.err = err;
+    }
+    return Err;
+}());
+function impossible(x) {
+    return x;
+}

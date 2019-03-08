@@ -14,11 +14,16 @@ use rocket::response::Redirect;
 use rocket::response::status::BadRequest;
 use rocket::request::Form;
 use rocket::State;
+
+use rocket_contrib::json::Json;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 
 mod sheet;
 use sheet::*;
+
+mod ts;
+use ts::ToTS;
 
 #[derive(Clone, Serialize)]
 struct CellView {
@@ -107,11 +112,20 @@ fn update(app_state: AppState, form: Form<UpdateParams>) -> Result<Redirect, Bad
   Ok(Redirect::to(redirect))
 }
 
+#[get("/check?<params..>")]
+fn check(params: Form<UpdateParams>) -> Json<ts::Result<(), String>> {
+    let res = match params.formula.parse::<Expr>() {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e.to_string()),
+    };
+    Json(res.to_ts())
+}
+
 fn rocket() -> rocket::Rocket {
   let sheet = Sheet::new(10, 6);
   let app_state = Mutex::new(sheet);
     rocket::ignite()
-      .mount("/", routes![index, view, update])
+      .mount("/", routes![index, view, check, update])
       .mount("/static", StaticFiles::from("static"))
       .attach(Template::fairing())
       .manage(app_state)

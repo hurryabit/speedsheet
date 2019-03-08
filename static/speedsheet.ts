@@ -98,9 +98,54 @@ $(document).ready(() => {
     const initCoord: string = $("#coord").val() as string;
     $("#" + initCoord).click();
 
+    $("#check").click(() => {
+        $("#formula").focus();
+        $.ajax({
+            data: $("#formula_form").serializeArray(),
+            dataType: "json",
+            url: "check",
+        })
+        .done((data: Result<null, string>) => {
+          switch (data.kind) {
+              case "Ok": {
+                  alert("all good");
+                  break;
+              }
+              case "Err": {
+                  alert(data.err);
+                  break;
+              }
+              default: impossible(data);
+          }
+        })
+        .fail((xhr, status, error) => { alert("Connection to server failed: " + error); });
+    });
+
     // $("#formula_form").on("submit", function(event) {
     //   event.preventDefault();
     //   var coord = $("#coord").val();
     //   $("#" + coord).text($("#formula").val());
     // });
 });
+
+class Ok<T> {
+    public kind: "Ok" = "Ok";
+    public ok: T;
+    constructor(ok: T) {
+        this.ok = ok;
+    }
+}
+
+class Err<E> {
+    public kind: "Err" = "Err";
+    public err: E;
+    constructor(err: E) {
+        this.err = err;
+    }
+}
+
+type Result <T, E> = Ok<T> | Err<E>;
+
+function impossible(x: never): never {
+    return x;
+}
