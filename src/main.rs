@@ -92,13 +92,13 @@ fn view(app_state: AppState, params: Form<ViewParams>) -> Template {
 }
 
 #[derive(FromForm)]
-struct Update {
+struct UpdateParams {
   coord: String,
   formula: String,
 }
 
 #[post("/update", data="<form>")]
-fn update(app_state: AppState, form: Form<Update>) -> Result<Redirect, BadRequest<String>> {
+fn update(app_state: AppState, form: Form<UpdateParams>) -> Result<Redirect, BadRequest<String>> {
   let coord = form.coord.parse::<Coord>().map_err(|e| BadRequest(Some(e.to_string())))?;
   let expr = form.formula.parse::<Expr>().map_err(|e| BadRequest(Some(e.to_string())))?;
   let sheet = &mut app_state.lock().unwrap();
