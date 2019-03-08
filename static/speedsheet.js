@@ -79,9 +79,7 @@ $(document).ready(function () {
         }
     });
     var initCoord = $("#coord").val();
-    if (initCoord !== "") {
-        $("#" + initCoord).click();
-    }
+    $("#" + initCoord).click();
     // $("#formula_form").on("submit", function(event) {
     //   event.preventDefault();
     //   var coord = $("#coord").val();

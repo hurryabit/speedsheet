@@ -94,9 +94,7 @@ $(document).ready(() => {
     });
 
     const initCoord: string = $("#coord").val() as string;
-    if (initCoord !== "") {
-      $("#" + initCoord).click();
-    }
+    $("#" + initCoord).click();
 
     // $("#formula_form").on("submit", function(event) {
     //   event.preventDefault();
