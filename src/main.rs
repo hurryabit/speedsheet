@@ -66,24 +66,29 @@ impl SheetView {
 }
 
 #[derive(Serialize)]
-struct View {
+struct AppView {
   sheet_view: SheetView,
-  selected_coord: Option<String>,
+  selected_coord: String,
 }
 
 type AppState<'r> = State<'r, Mutex<Sheet>>;
 
-#[derive(FromForm, UriDisplayQuery)]
-struct IndexParams {
-  select: Option<String>,
+#[get("/")]
+fn index() -> Redirect {
+  Redirect::to(uri!(view: params = ViewParams { select: "A1".to_string() }))
 }
 
-#[get("/?<params..>")]
-fn index(app_state: AppState, params: Form<IndexParams>) -> Template {
+#[derive(FromForm, UriDisplayQuery)]
+struct ViewParams {
+  select: String,
+}
+
+#[get("/view?<params..>")]
+fn view(app_state: AppState, params: Form<ViewParams>) -> Template {
   let sheet = &app_state.lock().unwrap();
   let sheet_view = SheetView::from_sheet(sheet);
-  let view = View { sheet_view, selected_coord: params.select.clone(), };
-  Template::render("index", &view)
+  let app_view = AppView { sheet_view, selected_coord: params.select.clone(), };
+  Template::render("index", &app_view)
 }
 
 #[derive(FromForm)]
@@ -98,7 +103,7 @@ fn update(app_state: AppState, form: Form<Update>) -> Result<Redirect, BadReques
   let expr = form.formula.parse::<Expr>().map_err(|e| BadRequest(Some(e.to_string())))?;
   let sheet = &mut app_state.lock().unwrap();
   sheet.set(&coord, expr);
-  let redirect: Uri = uri!(index: params = IndexParams { select: Some(coord.to_string()) }).into();
+  let redirect: Uri = uri!(view: params = ViewParams { select: coord.to_string() }).into();
   Ok(Redirect::to(redirect))
 }
 
@@ -106,7 +111,7 @@ fn rocket() -> rocket::Rocket {
   let sheet = Sheet::new(10, 6);
   let app_state = Mutex::new(sheet);
     rocket::ignite()
-      .mount("/", routes![index, update])
+      .mount("/", routes![index, view, update])
       .mount("/static", StaticFiles::from("static"))
       .attach(Template::fairing())
       .manage(app_state)
