@@ -1,5 +1,9 @@
 const KEY_ENTER: number = 13;
 const KEY_ESCAPE: number = 27;
+const KEY_LEFT: number = 37;
+const KEY_UP: number = 38;
+const KEY_RIGHT: number = 39;
+const KEY_DOWN: number = 40;
 
 // Handler for clicking on cells.
 function onSelectCell(event: Event) {
@@ -27,12 +31,43 @@ function onEditCell(event: Event) {
     onSelectCell(event);
     $("#formula_fieldset").prop("disabled", false);
     $("#formula").focus();
+    $("#formula").select();
 }
 
 function onKeypressCell(event) {
     if (event.which === KEY_ENTER) {
         $(event.target).dblclick();
     }
+}
+
+function onKeydownCell(event) {
+    const oldCoord: string = (event.target as Element).id;
+    let newCoord: string;
+
+    switch (event.which) {
+        case KEY_LEFT: {
+          newCoord = String.fromCharCode(oldCoord.charCodeAt(0) - 1) + oldCoord.substring(1);
+          break;
+        }
+        case KEY_UP: {
+          const row = parseInt(oldCoord.substring(1));
+          newCoord = oldCoord.charAt(0) + (row - 1).toString();
+          break;
+        }
+        case KEY_RIGHT: {
+          newCoord = String.fromCharCode(oldCoord.charCodeAt(0) + 1) + oldCoord.substring(1);
+          break;
+        }
+        case KEY_DOWN: {
+          const row = parseInt(oldCoord.substring(1));
+          newCoord = oldCoord.charAt(0) + (row + 1).toString();
+          break;
+        }
+        default:
+            return;
+    }
+
+    $("#" + newCoord).click();
 }
 
 // Do this when everthing is loaded.
@@ -47,6 +82,7 @@ $(document).ready(() => {
         $(cell).on("click", onSelectCell);
         $(cell).on("dblclick", onEditCell);
         $(cell).on("keypress", onKeypressCell);
+        $(cell).on("keydown", onKeydownCell);
     });
 
     $("#formula").on("keypress", (event) => {
