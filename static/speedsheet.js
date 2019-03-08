@@ -1,9 +1,13 @@
-var KEY_ENTER = 13;
-var KEY_ESCAPE = 27;
-var KEY_LEFT = 37;
-var KEY_UP = 38;
-var KEY_RIGHT = 39;
-var KEY_DOWN = 40;
+"use strict";
+var Key;
+(function (Key) {
+    Key[Key["ENTER"] = 13] = "ENTER";
+    Key[Key["ESCAPE"] = 27] = "ESCAPE";
+    Key[Key["LEFT"] = 37] = "LEFT";
+    Key[Key["UP"] = 38] = "UP";
+    Key[Key["RIGHT"] = 39] = "RIGHT";
+    Key[Key["DOWN"] = 40] = "DOWN";
+})(Key || (Key = {}));
 // Handler for clicking on cells.
 function onSelectCell(event) {
     var newCell = $(event.target);
@@ -12,7 +16,7 @@ function onSelectCell(event) {
     var oldCoord = $("#coord").val();
     $("#coord").val(newCoord);
     // Adjust highlighted cell.
-    if (!(oldCoord === "")) {
+    if (oldCoord !== "") {
         $("#" + oldCoord).removeClass("table-primary");
     }
     newCell.addClass("table-primary");
@@ -28,7 +32,7 @@ function onEditCell(event) {
     $("#formula").select();
 }
 function onKeypressCell(event) {
-    if (event.which === KEY_ENTER) {
+    if (event.which === Key.ENTER) {
         $(event.target).dblclick();
     }
 }
@@ -36,21 +40,21 @@ function onKeydownCell(event) {
     var oldCoord = event.target.id;
     var newCoord;
     switch (event.which) {
-        case KEY_LEFT: {
+        case Key.LEFT: {
             newCoord = String.fromCharCode(oldCoord.charCodeAt(0) - 1) + oldCoord.substring(1);
             break;
         }
-        case KEY_UP: {
-            var row = parseInt(oldCoord.substring(1));
+        case Key.UP: {
+            var row = parseInt(oldCoord.substring(1), 10);
             newCoord = oldCoord.charAt(0) + (row - 1).toString();
             break;
         }
-        case KEY_RIGHT: {
+        case Key.RIGHT: {
             newCoord = String.fromCharCode(oldCoord.charCodeAt(0) + 1) + oldCoord.substring(1);
             break;
         }
-        case KEY_DOWN: {
-            var row = parseInt(oldCoord.substring(1));
+        case Key.DOWN: {
+            var row = parseInt(oldCoord.substring(1), 10);
             newCoord = oldCoord.charAt(0) + (row + 1).toString();
             break;
         }
@@ -72,7 +76,7 @@ $(document).ready(function () {
         $(cell).on("keydown", onKeydownCell);
     });
     $("#formula").on("keypress", function (event) {
-        if (event.which === KEY_ESCAPE) {
+        if (event.which === Key.ESCAPE) {
             var coord = $("#coord").val();
             $("#" + coord).click();
             event.preventDefault();
