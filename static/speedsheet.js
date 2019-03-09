@@ -2,6 +2,7 @@
 var logArea;
 var coordInput;
 var formulaInput;
+var formulaFieldSet;
 var Key;
 (function (Key) {
     Key[Key["ENTER"] = 13] = "ENTER";
@@ -26,11 +27,11 @@ function onSelectCell(event) {
     newCell.focus();
     // Copy cell value into input field.
     formulaInput.value = newCell.attr("data-formula");
-    $("#formula_fieldset").prop("disabled", true);
+    formulaFieldSet.disabled = true;
 }
 function onEditCell(event) {
     onSelectCell(event);
-    $("#formula_fieldset").prop("disabled", false);
+    formulaFieldSet.disabled = false;
     formulaInput.focus();
     formulaInput.select();
 }
@@ -88,6 +89,7 @@ function initialize() {
     var clearButton = document.querySelector("#clear");
     coordInput = document.querySelector("#coord");
     formulaInput = document.querySelector("#formula");
+    formulaFieldSet = document.querySelector("#formula_fieldset");
     // Set up log widget.
     $(logArea).outerHeight($(sheetTable).outerHeight());
     clearLog();

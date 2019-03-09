@@ -1,6 +1,7 @@
 let logArea: HTMLTextAreaElement;
 let coordInput: HTMLInputElement;
 let formulaInput: HTMLInputElement;
+let formulaFieldSet: HTMLFieldSetElement;
 
 enum Key {
     ENTER = 13,
@@ -30,12 +31,12 @@ function onSelectCell(event: Event) {
     // Copy cell value into input field.
     formulaInput.value = newCell.attr("data-formula")!;
 
-    $("#formula_fieldset").prop("disabled", true);
+    formulaFieldSet.disabled = true;
 }
 
 function onEditCell(event: Event) {
     onSelectCell(event);
-    $("#formula_fieldset").prop("disabled", false);
+    formulaFieldSet.disabled = false;
     formulaInput.focus();
     formulaInput.select();
 }
@@ -104,6 +105,7 @@ function initialize() {
 
     coordInput = document.querySelector("#coord") as HTMLInputElement;
     formulaInput = document.querySelector("#formula") as HTMLInputElement;
+    formulaFieldSet = document.querySelector("#formula_fieldset") as HTMLFieldSetElement;
 
     // Set up log widget.
     $(logArea).outerHeight($(sheetTable).outerHeight()!);
