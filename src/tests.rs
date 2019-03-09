@@ -6,7 +6,7 @@ use Expr::*;
 #[test]
 fn evaluation() {
   helper::with_sheet_3(|mut sheet, [x, y, z]| {
-    let expr = Expr::add(Var(x), Var(y));
+    let expr = Var(x) + Var(y);
     assert!(sheet.set(&x, Int(1)).is_ok());
     assert!(sheet.set(&y, Int(2)).is_ok());
     assert!(sheet.set(&z, expr.clone()).is_ok());
@@ -30,7 +30,7 @@ fn propagation() {
 fn cycle_detection_1() {
   helper::with_sheet_1(|mut sheet, [x]| {
     let expected_sheet = sheet.clone();
-    assert!(sheet.set(&x, Expr::add(Var(x), Int(1))).is_err());
+    assert!(sheet.set(&x, Var(x) + Int(1)).is_err());
     assert_eq!(sheet, expected_sheet);
   })
 }
@@ -42,7 +42,7 @@ fn cycle_detection_2() {
   helper::with_sheet_2(|mut sheet, [x, y]| {
     assert!(sheet.set(&x, Var(y)).is_ok());
     let expected_sheet = sheet.clone();
-    assert!(sheet.set(&y, Expr::add(Var(x), Int(1))).is_err());
+    assert!(sheet.set(&y, Var(x) + Int(1)).is_err());
     assert_eq!(sheet, expected_sheet);
   })
 }
@@ -52,8 +52,8 @@ fn cycle_detection_2() {
 #[test]
 fn cycle_detection_3() {
   helper::with_sheet_3(|mut sheet, [x, y, z]| {
-    assert!(sheet.set(&y, Expr::add(Var(x), Int(1))).is_ok());
-    assert!(sheet.set(&z, Expr::add(Var(x), Var(y))).is_ok());
+    assert!(sheet.set(&y, Var(x) + Int(1)).is_ok());
+    assert!(sheet.set(&z, Var(x) + Var(y)).is_ok());
     let expected_sheet = sheet.clone();
     assert!(sheet.set(&x, Var(z)).is_err());
     assert_eq!(sheet, expected_sheet);
@@ -68,11 +68,25 @@ fn cycle_detection_3() {
 fn cycle_detection_4() {
   use helper::{A1, B1, C1, D1};
   let mut sheet = Sheet::new(1, 4);
-  assert!(sheet.set(&B1, Expr::add(Var(A1), Int(1))).is_ok());
-  assert!(sheet.set(&C1, Expr::add(Var(A1), Var(B1))).is_ok());
+  assert!(sheet.set(&B1, Var(A1) + Int(1)).is_ok());
+  assert!(sheet.set(&C1, Var(A1) + Var(B1)).is_ok());
   assert!(sheet.set(&D1, Var(C1)).is_ok());
   let expected_sheet = sheet.clone();
   assert!(sheet.set(&A1, Var(D1)).is_err());
+  assert_eq!(sheet, expected_sheet);
+}
+
+/// FIXME: This should not blow up with "Too many steps". However, it does
+/// because the current implementation is exponential.
+#[test]
+fn no_blowup() {
+  use helper::{A1, B1, C1, D1};
+  let mut sheet = Sheet::new(1, 4);
+  assert!(sheet.set(&B1, Var(A1)).is_ok());
+  assert!(sheet.set(&C1, Var(A1) + Var(B1)).is_ok());
+  assert!(sheet.set(&D1, Var(B1) + Var(C1)).is_ok());
+  let expected_sheet = sheet.clone();
+  assert_eq!(sheet.set(&A1, Int(1)).unwrap_err(), "Too many steps".to_string());
   assert_eq!(sheet, expected_sheet);
 }
 

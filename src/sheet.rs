@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::convert::TryFrom;
 use std::fmt;
+use std::ops::Add;
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -58,13 +59,18 @@ pub enum Expr {
   Binop(Binop, Box<Expr>, Box<Expr>),
 }
 
+impl Add for Expr {
+  type Output = Expr;
+
+  fn add(self, other: Expr) -> Expr {
+    Expr::binop(Binop::Add, self, other)
+  }
+}
+
+
 impl Expr {
   fn binop(op: Binop, e1: Expr, e2: Expr) -> Expr {
     Expr::Binop(op, Box::new(e1), Box::new(e2))
-  }
-
-  pub fn add(e1: Expr, e2: Expr) -> Expr {
-    Expr::binop(Binop::Add, e1, e2)
   }
 
   fn build_vars(&self, mut acc: &mut HashSet<Coord>) {
@@ -256,6 +262,7 @@ impl Sheet {
   }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct LogEntry {
   coord: Coord,
   from: i64,
