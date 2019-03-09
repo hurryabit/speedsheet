@@ -7,7 +7,8 @@
     "rules": {
         "array-type": [true, "generic"],
         "interface-name": false,
-        "max-classes-per-file": false
+        "max-classes-per-file": false,
+        "one-line": [true, "check-open-brace"]
     },
     "rulesDirectory": []
 }

@@ -1,3 +1,6 @@
+let logArea: HTMLTextAreaElement;
+let coordInput: HTMLInputElement;
+
 enum Key {
     ENTER = 13,
     ESCAPE = 27,
@@ -13,8 +16,8 @@ function onSelectCell(event: Event) {
     const newCoord = newCell.prop("id");
 
     // Get old coordinate and set new coordinate.
-    const oldCoord: string = $("#coord").val() as string;
-    $("#coord").val(newCoord);
+    const oldCoord: string = coordInput.value;
+    coordInput.value = newCoord;
 
     // Adjust highlighted cell.
     if (oldCoord !== "") {
@@ -72,25 +75,36 @@ function onKeydownCell(event: any) {
     $("#" + newCoord).click();
 }
 
-function selectedCell(): JQuery<HTMLElement> {
-    const coord: string = $("#coord").val() as string;
-    return $("#" + coord);
+function selectedCell(): HTMLTableCellElement {
+    return document.querySelector("#" + coordInput.value) as HTMLTableCellElement;
 }
 
 function log(msg: string) {
-    const logArea = $("#log");
-    logArea.val(logArea.val() + "\n" + msg);
-    logArea.scrollTop(logArea[0].scrollHeight);
+    logArea.value += "\n" + msg;
+    logArea.scrollTop = logArea.scrollHeight;
 }
 
 function clearLog() {
-    $("#log").val("Computation log:");
+    logArea.value = "Computation log:";
 }
 
-// Do this when everthing is loaded.
-$(document).ready(() => {
-    // Make log window as big as table.
-    $("#log").outerHeight($("#sheet").outerHeight()!);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initialize);
+}
+else {
+  initialize();
+}
+
+function initialize() {
+    // Set up log widget.
+    logArea = document.querySelector("#log") as HTMLTextAreaElement;
+    const sheetTable: HTMLTableElement = document.querySelector("#sheet") as HTMLTableElement;
+    $(logArea).outerHeight($(sheetTable).outerHeight()!);
+    clearLog();
+    const clearButton: Element = document.querySelector("#clear")!;
+    clearButton.addEventListener("click", () => clearLog());
+
+    coordInput = document.querySelector("#coord") as HTMLInputElement;
 
     // Install handler for clicking on table cells.
     $("td").each((_, cell) => {
@@ -103,17 +117,13 @@ $(document).ready(() => {
     });
 
     $("#formula").on("keydown", (event) => {
-        console.log(event);
         if (event.which === Key.ESCAPE) {
             event.preventDefault();
             selectedCell().click();
         }
     });
 
-    selectedCell().click()
-
-    $("#clear").click(() => clearLog());
-    clearLog();
+    selectedCell().click();
 
     $("#formula_form").submit((event) => {
         event.preventDefault();
@@ -126,12 +136,12 @@ $(document).ready(() => {
         .done((data: Result<Log, string>) => {
           switch (data.kind) {
               case "Ok": {
-                  log("> " + $("#coord").val() + " = " + $("#formula").val());
-                  for (let entry of data.ok) {
+                  log("> " + coordInput.value + " = " + $("#formula").val());
+                  for (const entry of data.ok) {
                       $("#" + entry.coord).text(entry.to);
                       log(entry.coord + " = " + entry.to);
                   }
-                  selectedCell().attr("data-formula", $("#formula").val() as string);
+                  selectedCell().dataset.formula = $("#formula").val() as string;
                   selectedCell().click();
                   break;
               }
@@ -144,7 +154,7 @@ $(document).ready(() => {
         })
         .fail((xhr, status, error) => { alert("Connection to server failed: " + error); });
     });
-});
+}
 
 class Ok<T> {
     public kind: "Ok" = "Ok";

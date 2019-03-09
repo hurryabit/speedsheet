@@ -1,4 +1,6 @@
 "use strict";
+var logArea;
+var coordInput;
 var Key;
 (function (Key) {
     Key[Key["ENTER"] = 13] = "ENTER";
@@ -13,8 +15,8 @@ function onSelectCell(event) {
     var newCell = $(event.target);
     var newCoord = newCell.prop("id");
     // Get old coordinate and set new coordinate.
-    var oldCoord = $("#coord").val();
-    $("#coord").val(newCoord);
+    var oldCoord = coordInput.value;
+    coordInput.value = newCoord;
     // Adjust highlighted cell.
     if (oldCoord !== "") {
         $("#" + oldCoord).removeClass("table-primary");
@@ -64,21 +66,30 @@ function onKeydownCell(event) {
     $("#" + newCoord).click();
 }
 function selectedCell() {
-    var coord = $("#coord").val();
-    return $("#" + coord);
+    return document.querySelector("#" + coordInput.value);
 }
 function log(msg) {
-    var logArea = $("#log");
-    logArea.val(logArea.val() + "\n" + msg);
-    logArea.scrollTop(logArea[0].scrollHeight);
+    logArea.value += "\n" + msg;
+    logArea.scrollTop = logArea.scrollHeight;
 }
 function clearLog() {
-    $("#log").val("Computation log:");
+    logArea.value = "Computation log:";
 }
-// Do this when everthing is loaded.
-$(document).ready(function () {
-    // Make log window as big as table.
-    $("#log").outerHeight($("#sheet").outerHeight());
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize);
+}
+else {
+    initialize();
+}
+function initialize() {
+    // Set up log widget.
+    logArea = document.querySelector("#log");
+    var sheetTable = document.querySelector("#sheet");
+    $(logArea).outerHeight($(sheetTable).outerHeight());
+    clearLog();
+    var clearButton = document.querySelector("#clear");
+    clearButton.addEventListener("click", function () { return clearLog(); });
+    coordInput = document.querySelector("#coord");
     // Install handler for clicking on table cells.
     $("td").each(function (_, cell) {
         $(cell).prop("tabindex", -1);
@@ -88,15 +99,12 @@ $(document).ready(function () {
         $(cell).on("keydown", onKeydownCell);
     });
     $("#formula").on("keydown", function (event) {
-        console.log(event);
         if (event.which === Key.ESCAPE) {
             event.preventDefault();
             selectedCell().click();
         }
     });
     selectedCell().click();
-    $("#clear").click(function () { return clearLog(); });
-    clearLog();
     $("#formula_form").submit(function (event) {
         event.preventDefault();
         $.ajax({
@@ -108,13 +116,13 @@ $(document).ready(function () {
             .done(function (data) {
             switch (data.kind) {
                 case "Ok": {
-                    log("> " + $("#coord").val() + " = " + $("#formula").val());
+                    log("> " + coordInput.value + " = " + $("#formula").val());
                     for (var _i = 0, _a = data.ok; _i < _a.length; _i++) {
                         var entry = _a[_i];
                         $("#" + entry.coord).text(entry.to);
                         log(entry.coord + " = " + entry.to);
                     }
-                    selectedCell().attr("data-formula", $("#formula").val());
+                    selectedCell().dataset.formula = $("#formula").val();
                     selectedCell().click();
                     break;
                 }
@@ -127,7 +135,7 @@ $(document).ready(function () {
         })
             .fail(function (xhr, status, error) { alert("Connection to server failed: " + error); });
     });
-});
+}
 var Ok = /** @class */ (function () {
     function Ok(ok) {
         this.kind = "Ok";
