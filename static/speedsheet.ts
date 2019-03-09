@@ -72,6 +72,11 @@ function onKeydownCell(event: any) {
     $("#" + newCoord).click();
 }
 
+function selectedCell(): JQuery<HTMLElement> {
+    const coord: string = $("#coord").val() as string;
+    return $("#" + coord);
+}
+
 // Do this when everthing is loaded.
 $(document).ready(() => {
     // Make log window as big as table.
@@ -87,28 +92,32 @@ $(document).ready(() => {
         $(cell).on("keydown", onKeydownCell);
     });
 
-    $("#formula").on("keypress", (event) => {
+    $("#formula").on("keydown", (event) => {
+        console.log(event);
         if (event.which === Key.ESCAPE) {
-            const coord: string = $("#coord").val() as string;
-            $("#" + coord).click();
             event.preventDefault();
+            selectedCell().click();
         }
     });
 
-    const initCoord: string = $("#coord").val() as string;
-    $("#" + initCoord).click();
+    selectedCell().click()
 
-    $("#check").click(() => {
-        $("#formula").focus();
+    $("#formula_form").submit((event) => {
+        event.preventDefault();
         $.ajax({
             data: $("#formula_form").serializeArray(),
             dataType: "json",
-            url: "check",
+            method: "post",
+            url: "update",
         })
-        .done((data: Result<null, string>) => {
+        .done((data: Result<Log, string>) => {
           switch (data.kind) {
               case "Ok": {
-                  alert("all good");
+                  for (let entry of data.ok) {
+                      $("#" + entry.coord).text(entry.to);
+                  }
+                  selectedCell().attr("data-formula", $("#formula").val() as string);
+                  selectedCell().click();
                   break;
               }
               case "Err": {
@@ -120,12 +129,6 @@ $(document).ready(() => {
         })
         .fail((xhr, status, error) => { alert("Connection to server failed: " + error); });
     });
-
-    // $("#formula_form").on("submit", function(event) {
-    //   event.preventDefault();
-    //   var coord = $("#coord").val();
-    //   $("#" + coord).text($("#formula").val());
-    // });
 });
 
 class Ok<T> {
@@ -135,6 +138,14 @@ class Ok<T> {
         this.ok = ok;
     }
 }
+
+interface LogEntry {
+  coord: string;
+  from: number;
+  to: number;
+}
+
+type Log = Array<LogEntry>;
 
 class Err<E> {
     public kind: "Err" = "Err";

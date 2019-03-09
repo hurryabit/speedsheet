@@ -63,6 +63,10 @@ function onKeydownCell(event) {
     }
     $("#" + newCoord).click();
 }
+function selectedCell() {
+    var coord = $("#coord").val();
+    return $("#" + coord);
+}
 // Do this when everthing is loaded.
 $(document).ready(function () {
     // Make log window as big as table.
@@ -75,26 +79,31 @@ $(document).ready(function () {
         $(cell).on("keypress", onKeypressCell);
         $(cell).on("keydown", onKeydownCell);
     });
-    $("#formula").on("keypress", function (event) {
+    $("#formula").on("keydown", function (event) {
+        console.log(event);
         if (event.which === Key.ESCAPE) {
-            var coord = $("#coord").val();
-            $("#" + coord).click();
             event.preventDefault();
+            selectedCell().click();
         }
     });
-    var initCoord = $("#coord").val();
-    $("#" + initCoord).click();
-    $("#check").click(function () {
-        $("#formula").focus();
+    selectedCell().click();
+    $("#formula_form").submit(function (event) {
+        event.preventDefault();
         $.ajax({
             data: $("#formula_form").serializeArray(),
             dataType: "json",
-            url: "check"
+            method: "post",
+            url: "update"
         })
             .done(function (data) {
             switch (data.kind) {
                 case "Ok": {
-                    alert("all good");
+                    for (var _i = 0, _a = data.ok; _i < _a.length; _i++) {
+                        var entry = _a[_i];
+                        $("#" + entry.coord).text(entry.to);
+                    }
+                    selectedCell().attr("data-formula", $("#formula").val());
+                    selectedCell().click();
                     break;
                 }
                 case "Err": {
@@ -106,11 +115,6 @@ $(document).ready(function () {
         })
             .fail(function (xhr, status, error) { alert("Connection to server failed: " + error); });
     });
-    // $("#formula_form").on("submit", function(event) {
-    //   event.preventDefault();
-    //   var coord = $("#coord").val();
-    //   $("#" + coord).text($("#formula").val());
-    // });
 });
 var Ok = /** @class */ (function () {
     function Ok(ok) {

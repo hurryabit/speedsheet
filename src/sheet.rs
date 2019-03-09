@@ -1,3 +1,4 @@
+use serde::{Serialize, Serializer};
 use std::borrow::Borrow;
 use std::collections::HashSet;
 use std::collections::VecDeque;
@@ -31,6 +32,12 @@ impl fmt::Display for Coord {
 impl fmt::Debug for Coord {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     fmt::Display::fmt(self, f)
+  }
+}
+
+impl Serialize for Coord {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    self.to_string().serialize(serializer)
   }
 }
 
@@ -262,7 +269,7 @@ impl Sheet {
   }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize)]
 pub struct LogEntry {
   coord: Coord,
   from: i64,
@@ -270,4 +277,4 @@ pub struct LogEntry {
   to: i64,
 }
 
-type Log = Vec<LogEntry>;
+pub type Log = Vec<LogEntry>;

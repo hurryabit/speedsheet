@@ -10,9 +10,7 @@ mod tests;
 use std::sync::Mutex;
 use std::vec::Vec;
 
-use rocket::http::uri::Uri;
 use rocket::response::Redirect;
-use rocket::response::status::BadRequest;
 use rocket::request::Form;
 use rocket::State;
 
@@ -103,30 +101,24 @@ struct UpdateParams {
   formula: String,
 }
 
-#[post("/update", data="<form>")]
-fn update(app_state: AppState, form: Form<UpdateParams>) -> Result<Redirect, BadRequest<String>> {
-  let coord = form.coord.parse::<Coord>().map_err(|e| BadRequest(Some(e.to_string())))?;
-  let expr = form.formula.parse::<Expr>().map_err(|e| BadRequest(Some(e.to_string())))?;
-  let sheet = &mut app_state.lock().unwrap();
-  sheet.set(&coord, expr).map_err(|e| BadRequest(Some(e)))?;
-  let redirect: Uri = uri!(view: params = ViewParams { select: coord.to_string() }).into();
-  Ok(Redirect::to(redirect))
+#[post("/update", data="<params>")]
+fn update(app_state: AppState, params: Form<UpdateParams>) -> Json<ts::Result<Log, String>> {
+  Json(update_rs(app_state, params).to_ts())
 }
 
-#[get("/check?<params..>")]
-fn check(params: Form<UpdateParams>) -> Json<ts::Result<(), String>> {
-    let res = match params.formula.parse::<Expr>() {
-        Ok(_) => Ok(()),
-        Err(e) => Err(e.to_string()),
-    };
-    Json(res.to_ts())
+fn update_rs(app_state: AppState, form: Form<UpdateParams>) -> Result<Log, String> {
+  let coord = form.coord.parse::<Coord>().map_err(|e| e.to_string())?;
+  let expr = form.formula.parse::<Expr>().map_err(|e| e.to_string())?;
+  let sheet = &mut app_state.lock().unwrap();
+  let log = sheet.set(&coord, expr)?;
+  Ok(log)
 }
 
 fn rocket() -> rocket::Rocket {
   let sheet = Sheet::new(10, 6);
   let app_state = Mutex::new(sheet);
     rocket::ignite()
-      .mount("/", routes![index, view, check, update])
+      .mount("/", routes![index, view, update])
       .mount("/static", StaticFiles::from("static"))
       .attach(Template::fairing())
       .manage(app_state)
