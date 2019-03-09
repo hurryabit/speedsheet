@@ -1,6 +1,7 @@
 "use strict";
 var logArea;
 var coordInput;
+var formulaInput;
 var Key;
 (function (Key) {
     Key[Key["ENTER"] = 13] = "ENTER";
@@ -24,14 +25,14 @@ function onSelectCell(event) {
     newCell.addClass("table-primary");
     newCell.focus();
     // Copy cell value into input field.
-    $("#formula").val(newCell.attr("data-formula"));
+    formulaInput.value = newCell.attr("data-formula");
     $("#formula_fieldset").prop("disabled", true);
 }
 function onEditCell(event) {
     onSelectCell(event);
     $("#formula_fieldset").prop("disabled", false);
-    $("#formula").focus();
-    $("#formula").select();
+    formulaInput.focus();
+    formulaInput.select();
 }
 function onKeypressCell(event) {
     if (event.which === Key.ENTER) {
@@ -82,14 +83,15 @@ else {
     initialize();
 }
 function initialize() {
-    // Set up log widget.
-    logArea = document.querySelector("#log");
     var sheetTable = document.querySelector("#sheet");
+    logArea = document.querySelector("#log");
+    var clearButton = document.querySelector("#clear");
+    coordInput = document.querySelector("#coord");
+    formulaInput = document.querySelector("#formula");
+    // Set up log widget.
     $(logArea).outerHeight($(sheetTable).outerHeight());
     clearLog();
-    var clearButton = document.querySelector("#clear");
     clearButton.addEventListener("click", function () { return clearLog(); });
-    coordInput = document.querySelector("#coord");
     // Install handler for clicking on table cells.
     $("td").each(function (_, cell) {
         $(cell).prop("tabindex", -1);
@@ -98,7 +100,7 @@ function initialize() {
         $(cell).on("keypress", onKeypressCell);
         $(cell).on("keydown", onKeydownCell);
     });
-    $("#formula").on("keydown", function (event) {
+    formulaInput.addEventListener("keydown", function (event) {
         if (event.which === Key.ESCAPE) {
             event.preventDefault();
             selectedCell().click();
@@ -116,13 +118,13 @@ function initialize() {
             .done(function (data) {
             switch (data.kind) {
                 case "Ok": {
-                    log("> " + coordInput.value + " = " + $("#formula").val());
+                    log("> " + coordInput.value + " = " + formulaInput.value);
                     for (var _i = 0, _a = data.ok; _i < _a.length; _i++) {
                         var entry = _a[_i];
                         $("#" + entry.coord).text(entry.to);
                         log(entry.coord + " = " + entry.to);
                     }
-                    selectedCell().dataset.formula = $("#formula").val();
+                    selectedCell().dataset.formula = formulaInput.value;
                     selectedCell().click();
                     break;
                 }

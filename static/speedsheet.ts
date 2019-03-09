@@ -1,5 +1,6 @@
 let logArea: HTMLTextAreaElement;
 let coordInput: HTMLInputElement;
+let formulaInput: HTMLInputElement;
 
 enum Key {
     ENTER = 13,
@@ -27,7 +28,7 @@ function onSelectCell(event: Event) {
     newCell.focus();
 
     // Copy cell value into input field.
-    $("#formula").val(newCell.attr("data-formula")!);
+    formulaInput.value = newCell.attr("data-formula")!;
 
     $("#formula_fieldset").prop("disabled", true);
 }
@@ -35,8 +36,8 @@ function onSelectCell(event: Event) {
 function onEditCell(event: Event) {
     onSelectCell(event);
     $("#formula_fieldset").prop("disabled", false);
-    $("#formula").focus();
-    $("#formula").select();
+    formulaInput.focus();
+    formulaInput.select();
 }
 
 function onKeypressCell(event: any) {
@@ -96,15 +97,18 @@ else {
 }
 
 function initialize() {
-    // Set up log widget.
-    logArea = document.querySelector("#log") as HTMLTextAreaElement;
     const sheetTable: HTMLTableElement = document.querySelector("#sheet") as HTMLTableElement;
-    $(logArea).outerHeight($(sheetTable).outerHeight()!);
-    clearLog();
+
+    logArea = document.querySelector("#log") as HTMLTextAreaElement;
     const clearButton: Element = document.querySelector("#clear")!;
-    clearButton.addEventListener("click", () => clearLog());
 
     coordInput = document.querySelector("#coord") as HTMLInputElement;
+    formulaInput = document.querySelector("#formula") as HTMLInputElement;
+
+    // Set up log widget.
+    $(logArea).outerHeight($(sheetTable).outerHeight()!);
+    clearLog();
+    clearButton.addEventListener("click", () => clearLog());
 
     // Install handler for clicking on table cells.
     $("td").each((_, cell) => {
@@ -116,7 +120,7 @@ function initialize() {
         $(cell).on("keydown", onKeydownCell);
     });
 
-    $("#formula").on("keydown", (event) => {
+    formulaInput.addEventListener("keydown", (event) => {
         if (event.which === Key.ESCAPE) {
             event.preventDefault();
             selectedCell().click();
@@ -136,12 +140,12 @@ function initialize() {
         .done((data: Result<Log, string>) => {
           switch (data.kind) {
               case "Ok": {
-                  log("> " + coordInput.value + " = " + $("#formula").val());
+                  log("> " + coordInput.value + " = " + formulaInput.value);
                   for (const entry of data.ok) {
                       $("#" + entry.coord).text(entry.to);
                       log(entry.coord + " = " + entry.to);
                   }
-                  selectedCell().dataset.formula = $("#formula").val() as string;
+                  selectedCell().dataset.formula = formulaInput.value;
                   selectedCell().click();
                   break;
               }
