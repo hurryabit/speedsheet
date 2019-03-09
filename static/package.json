@@ -2,9 +2,16 @@
   "name": "speedsheet",
   "version": "0.0.0",
   "description": "Never wait for your calculations again.",
-  "main": "speedsheet.js",
+  "main": "speedsheet.ts",
   "author": "Martin Huschenbett <martin.huschenbett@posteo.me",
-  "dependencies": {
-    "@types/jquery": "^3.3.29"
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jquery": "^3.3.29",
+    "jest": "^24.3.1",
+    "jest-puppeteer": "^4.0.0",
+    "puppeteer": "^1.13.0"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
