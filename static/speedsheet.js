@@ -3,6 +3,7 @@ var logArea;
 var coordInput;
 var formulaInput;
 var formulaFieldSet;
+var formulaForm;
 var Key;
 (function (Key) {
     Key[Key["ENTER"] = 13] = "ENTER";
@@ -90,6 +91,7 @@ function initialize() {
     coordInput = document.querySelector("#coord");
     formulaInput = document.querySelector("#formula");
     formulaFieldSet = document.querySelector("#formula_fieldset");
+    formulaForm = document.querySelector("#formula_form");
     // Set up log widget.
     $(logArea).outerHeight($(sheetTable).outerHeight());
     clearLog();
@@ -109,10 +111,10 @@ function initialize() {
         }
     });
     selectedCell().click();
-    $("#formula_form").submit(function (event) {
+    formulaForm.addEventListener("submit", function (event) {
         event.preventDefault();
         $.ajax({
-            data: $("#formula_form").serializeArray(),
+            data: $(formulaForm).serializeArray(),
             dataType: "json",
             method: "post",
             url: "update"

@@ -2,6 +2,7 @@ let logArea: HTMLTextAreaElement;
 let coordInput: HTMLInputElement;
 let formulaInput: HTMLInputElement;
 let formulaFieldSet: HTMLFieldSetElement;
+let formulaForm: HTMLFormElement;
 
 enum Key {
     ENTER = 13,
@@ -106,6 +107,7 @@ function initialize() {
     coordInput = document.querySelector("#coord") as HTMLInputElement;
     formulaInput = document.querySelector("#formula") as HTMLInputElement;
     formulaFieldSet = document.querySelector("#formula_fieldset") as HTMLFieldSetElement;
+    formulaForm = document.querySelector("#formula_form") as HTMLFormElement;
 
     // Set up log widget.
     $(logArea).outerHeight($(sheetTable).outerHeight()!);
@@ -131,10 +133,10 @@ function initialize() {
 
     selectedCell().click();
 
-    $("#formula_form").submit((event) => {
+    formulaForm.addEventListener("submit", (event) => {
         event.preventDefault();
         $.ajax({
-            data: $("#formula_form").serializeArray(),
+            data: $(formulaForm).serializeArray(),
             dataType: "json",
             method: "post",
             url: "update",
