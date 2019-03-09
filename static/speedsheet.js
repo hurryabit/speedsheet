@@ -67,6 +67,14 @@ function selectedCell() {
     var coord = $("#coord").val();
     return $("#" + coord);
 }
+function log(msg) {
+    var logArea = $("#log");
+    logArea.val(logArea.val() + "\n" + msg);
+    logArea.scrollTop(logArea[0].scrollHeight);
+}
+function clearLog() {
+    $("#log").val("Computation log:");
+}
 // Do this when everthing is loaded.
 $(document).ready(function () {
     // Make log window as big as table.
@@ -87,6 +95,8 @@ $(document).ready(function () {
         }
     });
     selectedCell().click();
+    $("#clear").click(function () { return clearLog(); });
+    clearLog();
     $("#formula_form").submit(function (event) {
         event.preventDefault();
         $.ajax({
@@ -98,9 +108,11 @@ $(document).ready(function () {
             .done(function (data) {
             switch (data.kind) {
                 case "Ok": {
+                    log("> " + $("#coord").val() + " = " + $("#formula").val());
                     for (var _i = 0, _a = data.ok; _i < _a.length; _i++) {
                         var entry = _a[_i];
                         $("#" + entry.coord).text(entry.to);
+                        log(entry.coord + " = " + entry.to);
                     }
                     selectedCell().attr("data-formula", $("#formula").val());
                     selectedCell().click();

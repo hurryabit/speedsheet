@@ -77,6 +77,16 @@ function selectedCell(): JQuery<HTMLElement> {
     return $("#" + coord);
 }
 
+function log(msg: string) {
+    const logArea = $("#log");
+    logArea.val(logArea.val() + "\n" + msg);
+    logArea.scrollTop(logArea[0].scrollHeight);
+}
+
+function clearLog() {
+    $("#log").val("Computation log:");
+}
+
 // Do this when everthing is loaded.
 $(document).ready(() => {
     // Make log window as big as table.
@@ -102,6 +112,9 @@ $(document).ready(() => {
 
     selectedCell().click()
 
+    $("#clear").click(() => clearLog());
+    clearLog();
+
     $("#formula_form").submit((event) => {
         event.preventDefault();
         $.ajax({
@@ -113,8 +126,10 @@ $(document).ready(() => {
         .done((data: Result<Log, string>) => {
           switch (data.kind) {
               case "Ok": {
+                  log("> " + $("#coord").val() + " = " + $("#formula").val());
                   for (let entry of data.ok) {
                       $("#" + entry.coord).text(entry.to);
+                      log(entry.coord + " = " + entry.to);
                   }
                   selectedCell().attr("data-formula", $("#formula").val() as string);
                   selectedCell().click();
