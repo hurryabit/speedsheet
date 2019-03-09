@@ -4,7 +4,8 @@
 #[macro_use] extern crate serde_derive;
 extern crate rocket_contrib;
 
-#[cfg(test)] mod tests;
+#[cfg(test)]
+mod tests;
 
 use std::sync::Mutex;
 use std::vec::Vec;
@@ -107,7 +108,7 @@ fn update(app_state: AppState, form: Form<UpdateParams>) -> Result<Redirect, Bad
   let coord = form.coord.parse::<Coord>().map_err(|e| BadRequest(Some(e.to_string())))?;
   let expr = form.formula.parse::<Expr>().map_err(|e| BadRequest(Some(e.to_string())))?;
   let sheet = &mut app_state.lock().unwrap();
-  sheet.set(&coord, expr);
+  sheet.set(&coord, expr).map_err(|e| BadRequest(Some(e)))?;
   let redirect: Uri = uri!(view: params = ViewParams { select: coord.to_string() }).into();
   Ok(Redirect::to(redirect))
 }

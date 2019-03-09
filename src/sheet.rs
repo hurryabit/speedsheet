@@ -6,7 +6,7 @@ use std::fmt;
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct Coord {
   pub row: usize,
   pub col: usize,
@@ -27,6 +27,12 @@ impl fmt::Display for Coord {
   }
 }
 
+impl fmt::Debug for Coord {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fmt::Display::fmt(self, f)
+  }
+}
+
 impl FromStr for Coord {
   type Err = ParseIntError;
 
@@ -38,14 +44,14 @@ impl FromStr for Coord {
   }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Binop {
   Add,
   Sub,
   Mul,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum Expr {
   Int(i64),
   Var(Coord),
@@ -55,6 +61,10 @@ pub enum Expr {
 impl Expr {
   fn binop(op: Binop, e1: Expr, e2: Expr) -> Expr {
     Expr::Binop(op, Box::new(e1), Box::new(e2))
+  }
+
+  pub fn add(e1: Expr, e2: Expr) -> Expr {
+    Expr::binop(Binop::Add, e1, e2)
   }
 
   fn build_vars(&self, mut acc: &mut HashSet<Coord>) {
@@ -77,7 +87,7 @@ impl Expr {
     acc
   }
 
-  fn pretty_with(&self, prec: usize, acc: &mut String) {
+  fn pretty_with(&self, all_parens: bool, prec: usize, acc: &mut String) {
     match self {
       Expr::Int(n) => acc.push_str(&n.to_string()),
       Expr::Var(x) => acc.push_str(&x.to_string()),
@@ -87,10 +97,11 @@ impl Expr {
           Binop::Sub => (prec > 0, 0, 1, '-'),
           Binop::Mul => (prec > 0, 1, 1, '*'),
         };
+        let parens = parens || all_parens;
         if parens { acc.push('('); }
-        e1.pretty_with(left_prec, acc);
+        e1.pretty_with(all_parens, left_prec, acc);
         acc.push(sym);
-        e2.pretty_with(right_prec, acc);
+        e2.pretty_with(all_parens, right_prec, acc);
         if parens { acc.push(')'); }
       }
     }
@@ -98,7 +109,13 @@ impl Expr {
 
   pub fn pretty(&self) -> String {
     let mut acc = String::new();
-    self.pretty_with(0, &mut acc);
+    self.pretty_with(false, 0, &mut acc);
+    acc
+  }
+
+  pub fn debug(&self) -> String {
+    let mut acc = String::new();
+    self.pretty_with(true, 0, &mut acc);
     acc
   }
 }
@@ -117,10 +134,17 @@ impl fmt::Display for Expr {
   }
 }
 
+impl fmt::Debug for Expr {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}", self.debug())
+  }
+}
+
 mod parser {
   include!(concat!(env!("OUT_DIR"), "/expr_parser.rs"));
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Cell {
   pub expr: Expr,
   pub value: i64,
@@ -133,6 +157,7 @@ impl Cell {
   }
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sheet {
   pub num_cols: usize,
   pub cells: Vec<Vec<Cell>>,
@@ -149,7 +174,7 @@ impl Sheet {
     Sheet { num_cols, cells }
   }
 
-  fn get(&self, coord: &Coord) -> &Cell {
+  pub fn get(&self, coord: &Coord) -> &Cell {
     &self.cells[coord.row as usize][coord.col as usize]
   }
 
@@ -173,7 +198,9 @@ impl Sheet {
     }
   }
 
-  pub fn set(&mut self, coord: &Coord, expr: Expr) {
+  /// Replace the expression in a given cell and update the reverse
+  /// dependencies. Returns the old expression.
+  fn replace_expr(&mut self, coord: &Coord, mut expr: Expr) -> Expr {
     let cell = self.get(coord);
     let old_deps = cell.expr.vars();
     let new_deps = expr.vars();
@@ -183,47 +210,57 @@ impl Sheet {
     for dep in new_deps.difference(&old_deps) {
       self.get_mut(dep).rev_deps.insert(*coord);
     }
-    self.get_mut(coord).expr = expr;
+    let cell = self.get_mut(coord);
+    std::mem::swap(&mut cell.expr, &mut expr);
+    expr
+  }
+
+  fn update_values(&mut self, coord: &Coord) -> (Result<(), String>, Log) {
+    let mut log = Vec::new();
+    let max_steps = self.cells.len() * self.num_cols;
+    let mut steps = 0;
     let mut queue = VecDeque::new();
     queue.push_back(*coord);
-    while let Some(that) = queue.pop_front() {
-      let cell = self.get(&that);
+    while let Some(cur_coord) = queue.pop_front() {
+      if steps > max_steps {
+        return (Err("Too many steps".to_string()), log);
+      }
+      steps += 1;
+      let cell = self.get(&cur_coord);
       let value = self.eval(&cell.expr);
       for rev_dep in &cell.rev_deps {
+        if rev_dep == coord {
+          return (Err("Circular dependencies".to_string()), log);
+        }
         queue.push_back(*rev_dep);
       }
-      println!("{} = {}", that, value);
-      self.get_mut(&that).value = value;
+      log.push(LogEntry { coord: cur_coord, from: cell.value, to: value });
+      self.get_mut(&cur_coord).value = value;
+    }
+    (Ok(()), log)
+  }
+
+  pub fn set(&mut self, coord: &Coord, expr: Expr) -> Result<Log, String> {
+    let old_expr = self.replace_expr(coord, expr);
+    let (res, log) = self.update_values(coord);
+    match res {
+      Ok(()) => Ok(log),
+      Err(msg) => {
+        self.replace_expr(coord, old_expr);
+        for entry in log.iter().rev() {
+          self.get_mut(&entry.coord).value = entry.from;
+        }
+        Err(msg)
+      }
     }
   }
 }
 
-/*
-fn main() {
-    use self::Binop::*;
-    use self::Expr::*;
-    let mut sheet = Sheet::new();
-
-    println!("> example1");
-    sheet.set("x", Int(1));
-    sheet.set("y", Int(2));
-    sheet.set("z", Int(4));
-    sheet.set("u", Expr::binop(Add, Var("x"), Var("y")));
-    sheet.set("v", Expr::binop(Add, Var("y"), Var("z")));
-    sheet.set("w", Expr::binop(Add, Var("u"), Var("v")));
-
-    println!("> x = 11");
-    sheet.set("x", Int(11));
-
-    println!("> y = 22");
-    sheet.set("y", Int(22));
-
-    println!("> example2");
-    sheet.set("a", Int(1));
-    sheet.set("b", Expr::binop(Mul, Int(2), Var("a")));
-    sheet.set("c", Expr::binop(Add, Var("b"), Var("a")));
-
-    println!("> a = 2");
-    sheet.set("a", Int(2));
+pub struct LogEntry {
+  coord: Coord,
+  from: i64,
+  #[allow(dead_code)]
+  to: i64,
 }
-*/
+
+type Log = Vec<LogEntry>;
