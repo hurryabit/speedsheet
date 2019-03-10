@@ -109,9 +109,9 @@ function initialize() {
         event.preventDefault();
         var body = { coord: selectedCell.id, formula: formulaInput.value };
         fetch("/update", {
-            method: "post",
+            body: JSON.stringify(body),
             headers: { "Content-type": "application/json" },
-            body: JSON.stringify(body)
+            method: "post"
         })
             .then(function (response) { return response.json(); })
             .then(function (data) {
@@ -121,7 +121,8 @@ function initialize() {
                     for (var _i = 0, _a = data.ok; _i < _a.length; _i++) {
                         var entry = _a[_i];
                         // TODO: Raise an error if the cell does not exist.
-                        document.querySelector("#" + entry.coord).textContent = entry.to.toString();
+                        var entryCell = document.querySelector("#" + entry.coord);
+                        entryCell.textContent = entry.to.toString();
                         log(entry.coord + " = " + entry.to);
                     }
                     selectedCell.dataset.formula = formulaInput.value;

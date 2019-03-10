@@ -21,7 +21,7 @@ function onSelectCell(event: Event) {
         return true;
     }
     else {
-        selectedCell.focus()
+        selectedCell.focus();
         return false;
     }
 }
@@ -125,20 +125,21 @@ function initialize() {
 
     formulaForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        let body = { coord: selectedCell.id, formula: formulaInput.value };
+        const body = { coord: selectedCell.id, formula: formulaInput.value };
         fetch("/update", {
-            method: "post",
+            body: JSON.stringify(body),
             headers: { "Content-type": "application/json" },
-            body: JSON.stringify(body)
+            method: "post",
         })
-        .then(response => response.json())
-        .then((data : Result<Log, string>) => {
+        .then((response) => response.json())
+        .then((data: Result<Log, string>) => {
             switch (data.kind) {
                 case "Ok": {
                     log("> " + selectedCell.id + " = " + formulaInput.value);
                     for (const entry of data.ok) {
                         // TODO: Raise an error if the cell does not exist.
-                        (document.querySelector("#" + entry.coord) as HTMLTableCellElement).textContent = entry.to.toString();
+                        const entryCell = document.querySelector("#" + entry.coord) as HTMLTableCellElement;
+                        entryCell.textContent = entry.to.toString();
                         log(entry.coord + " = " + entry.to);
                     }
                     selectedCell.dataset.formula = formulaInput.value;
@@ -152,7 +153,7 @@ function initialize() {
                 default: impossible(data);
             }
         })
-        .catch(error => {
+        .catch((error) => {
             alert("Connection to server failed: " + error);
         });
     });
