@@ -1,3 +1,5 @@
+#![deny(clippy::all)]
+#![deny(warnings)]
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use] extern crate rocket;
@@ -47,7 +49,7 @@ struct RowView {
 }
 
 impl RowView {
-  fn from_cells(row: usize, cells: &Vec<Cell>) -> Self {
+  fn from_cells(row: usize, cells: &[Cell]) -> Self {
     let cells = cells.iter().enumerate().map(|(col, cell)| CellView::from_cell(&Coord { row, col }, cell)).collect();
     let row = row + 1;
     RowView { row, cells }

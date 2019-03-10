@@ -85,7 +85,6 @@ impl Expr {
       Expr::Int(_) => (),
       Expr::Var(x) => {
         acc.insert(*x);
-        ()
       }
       Expr::Binop(_, e1, e2) => {
         e1.build_vars(&mut acc);
@@ -153,6 +152,7 @@ impl fmt::Debug for Expr {
   }
 }
 
+#[allow(clippy::all)]
 mod parser {
   include!(concat!(env!("OUT_DIR"), "/expr_parser.rs"));
 }
@@ -181,7 +181,7 @@ impl Sheet {
     let mut cells = Vec::new();
     cells.resize_with(num_rows, || {
       let mut row = Vec::new();
-      row.resize_with(num_cols, || Cell::new());
+      row.resize_with(num_cols, Cell::new);
       row
     });
     Sheet { num_cols, cells }
