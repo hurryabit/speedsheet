@@ -2,7 +2,8 @@
   "name": "speedsheet",
   "version": "0.0.0",
   "description": "Never wait for your calculations again.",
-  "main": "speedsheet.ts",
+  "license": "UNLICENSED",
+  "main": "speedsheet.js",
   "author": "Martin Huschenbett <martin.huschenbett@posteo.me",
   "dependencies": {},
   "devDependencies": {
@@ -12,6 +13,8 @@
     "puppeteer": "^1.13.0"
   },
   "scripts": {
-    "test": "jest"
+    "build": "tsc --build",
+    "test": "jest",
+    "watch": "tsc --watch"
   }
 }
