@@ -10,7 +10,7 @@ beforeAll(async () => {
   let env = process.env;
   let args = [];
   if (env.NO_CHROME_SANDBOX === "1") {
-    console.error("Disabling Chrom sandbox. This is DANGEROUS!");
+    process.stderr.write("\x1b[31m\x1b[1mDisabling Chrome sandbox. This is DANGEROUS!\x1b[0m");
     args = ["--no-sandbox"];
   }
   env.ROCKET_PORT = port;
