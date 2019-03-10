@@ -4,15 +4,6 @@ var formulaInput;
 var formulaFieldSet;
 var formulaForm;
 var selectedCell;
-var Key;
-(function (Key) {
-    Key[Key["ENTER"] = 13] = "ENTER";
-    Key[Key["ESCAPE"] = 27] = "ESCAPE";
-    Key[Key["LEFT"] = 37] = "LEFT";
-    Key[Key["UP"] = 38] = "UP";
-    Key[Key["RIGHT"] = 39] = "RIGHT";
-    Key[Key["DOWN"] = 40] = "DOWN";
-})(Key || (Key = {}));
 // Handler for clicking on cells.
 function onSelectCell(event) {
     var previousCell = selectedCell;
@@ -30,28 +21,28 @@ function onEditCell(event) {
     formulaInput.select();
 }
 function onKeypressCell(event) {
-    if (event.which === Key.ENTER) {
-        $(event.target).dblclick();
+    if (event.key === "Enter") {
+        onEditCell(event);
     }
 }
 function onKeydownCell(event) {
     var oldCoord = event.target.id;
     var newCoord;
-    switch (event.which) {
-        case Key.LEFT: {
+    switch (event.key) {
+        case "ArrowLeft": {
             newCoord = String.fromCharCode(oldCoord.charCodeAt(0) - 1) + oldCoord.substring(1);
             break;
         }
-        case Key.UP: {
+        case "ArrowUp": {
             var row = parseInt(oldCoord.substring(1), 10);
             newCoord = oldCoord.charAt(0) + (row - 1).toString();
             break;
         }
-        case Key.RIGHT: {
+        case "ArrowRight": {
             newCoord = String.fromCharCode(oldCoord.charCodeAt(0) + 1) + oldCoord.substring(1);
             break;
         }
-        case Key.DOWN: {
+        case "ArrowDown": {
             var row = parseInt(oldCoord.substring(1), 10);
             newCoord = oldCoord.charAt(0) + (row + 1).toString();
             break;
@@ -87,15 +78,15 @@ function initialize() {
     clearLog();
     clearButton.addEventListener("click", function () { return clearLog(); });
     // Install handler for clicking on table cells.
-    $("td").each(function (_, cell) {
-        $(cell).prop("tabindex", -1);
-        $(cell).on("click", onSelectCell);
-        $(cell).on("dblclick", onEditCell);
-        $(cell).on("keypress", onKeypressCell);
-        $(cell).on("keydown", onKeydownCell);
+    document.querySelectorAll("td").forEach(function (cell) {
+        cell.tabIndex = -1;
+        cell.addEventListener("click", onSelectCell);
+        cell.addEventListener("dblclick", onEditCell);
+        cell.addEventListener("keypress", onKeypressCell);
+        cell.addEventListener("keydown", onKeydownCell);
     });
     formulaInput.addEventListener("keydown", function (event) {
-        if (event.which === Key.ESCAPE) {
+        if (event.key === "Escape") {
             event.preventDefault();
             selectedCell.click();
         }
