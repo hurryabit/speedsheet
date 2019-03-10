@@ -72,26 +72,20 @@ impl SheetView {
 #[derive(Serialize)]
 struct AppView {
   sheet_view: SheetView,
-  selected_coord: String,
 }
 
 type AppState<'r> = State<'r, Mutex<Sheet>>;
 
 #[get("/")]
 fn index() -> Redirect {
-  Redirect::to(uri!(view: params = ViewParams { select: "A1".to_string() }))
+  Redirect::to(uri!(view))
 }
 
-#[derive(FromForm, UriDisplayQuery)]
-struct ViewParams {
-  select: String,
-}
-
-#[get("/view?<params..>")]
-fn view(app_state: AppState, params: Form<ViewParams>) -> Template {
+#[get("/view")]
+fn view(app_state: AppState) -> Template {
   let sheet = &app_state.lock().unwrap();
   let sheet_view = SheetView::from_sheet(sheet);
-  let app_view = AppView { sheet_view, selected_coord: params.select.clone(), };
+  let app_view = AppView { sheet_view };
   Template::render("index", &app_view)
 }
 
