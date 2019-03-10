@@ -10,7 +10,6 @@ beforeAll(async () => {
   let env = process.env;
   env.ROCKET_PORT = port;
   server = spawn("cargo", ["run"], {
-    cwd: "..",
     env: env,
     stdio: "inherit",
   });

@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 # Start in root of repository
-readonly ROOT=$(git rev-parse --show-toplevel)
+readonly ROOT=$(git rev-parse --show-toplevel || pwd)
 cd $ROOT
 
 # Make sure Rust is fine
@@ -13,13 +13,10 @@ cargo clippy
 cargo test
 
 # Make sure TypeScript is fine
-pushd ui
-tsc --project .
-tsfmt --verify
-tslint --project .
-popd
+yarn install
+yarn build
+yarn checkfmt
+yarn lint
 
 # Integration test
-pushd ui
 yarn test
-popd

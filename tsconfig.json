@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
         "strict": true,
-        "outDir": "../static",
+        "outDir": "static"
     },
     "files": [
-        "speedsheet.ts"
+        "src/speedsheet.ts"
     ]
 }
