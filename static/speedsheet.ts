@@ -47,20 +47,20 @@ function onKeydownCell(event: KeyboardEvent) {
 
     switch (event.key) {
         case "ArrowLeft": {
-          cellIndex -= 1;
-          break;
+            cellIndex -= 1;
+            break;
         }
         case "ArrowUp": {
-          rowIndex -= 1;
-          break;
+            rowIndex -= 1;
+            break;
         }
         case "ArrowRight": {
-          cellIndex += 1;
-          break;
+            cellIndex += 1;
+            break;
         }
         case "ArrowDown": {
-          rowIndex += 1;
-          break;
+            rowIndex += 1;
+            break;
         }
         default:
             return;
@@ -85,10 +85,10 @@ function clearLog() {
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initialize);
+    document.addEventListener("DOMContentLoaded", initialize);
 }
 else {
-  initialize();
+    initialize();
 }
 
 function initialize() {
@@ -131,38 +131,38 @@ function initialize() {
             headers: { "Content-type": "application/json" },
             method: "post",
         })
-        .then((response) => response.json())
-        .then((data: Result<Log, string>) => {
-            switch (data.kind) {
-                case "Ok": {
-                    log("> " + selectedCell.id + " = " + formulaInput.value);
-                    for (const entry of data.ok) {
-                        // TODO: Raise an error if the cell does not exist.
-                        const entryCell = document.querySelector("#" + entry.coord) as HTMLTableCellElement;
-                        entryCell.textContent = entry.to.toString();
-                        log(entry.coord + " = " + entry.to);
+            .then((response) => response.json())
+            .then((data: Result<Log, string>) => {
+                switch (data.kind) {
+                    case "Ok": {
+                        log("> " + selectedCell.id + " = " + formulaInput.value);
+                        for (const entry of data.ok) {
+                            // TODO: Raise an error if the cell does not exist.
+                            const entryCell = document.querySelector("#" + entry.coord) as HTMLTableCellElement;
+                            entryCell.textContent = entry.to.toString();
+                            log(entry.coord + " = " + entry.to);
+                        }
+                        selectedCell.dataset.formula = formulaInput.value;
+                        selectedCell.click();
+                        break;
                     }
-                    selectedCell.dataset.formula = formulaInput.value;
-                    selectedCell.click();
-                    break;
+                    case "Err": {
+                        alert(data.err);
+                        break;
+                    }
+                    default: impossible(data);
                 }
-                case "Err": {
-                    alert(data.err);
-                    break;
-                }
-                default: impossible(data);
-            }
-        })
-        .catch((error) => {
-            alert("Connection to server failed: " + error);
-        });
+            })
+            .catch((error) => {
+                alert("Connection to server failed: " + error);
+            });
     });
 }
 
 interface LogEntry {
-  coord: string;
-  from: number;
-  to: number;
+    coord: string;
+    from: number;
+    to: number;
 }
 
 type Log = Array<LogEntry>;
@@ -183,7 +183,7 @@ class Err<E> {
     }
 }
 
-type Result <T, E> = Ok<T> | Err<E>;
+type Result<T, E> = Ok<T> | Err<E>;
 
 function impossible(x: never): never {
     return x;
