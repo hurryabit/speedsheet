@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "strict": true,
+        "outDir": "../static",
     },
     "files": [
         "speedsheet.ts"

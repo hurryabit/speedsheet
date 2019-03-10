@@ -13,13 +13,13 @@ cargo clippy
 cargo test
 
 # Make sure TypeScript is fine
-pushd static
+pushd ui
 tsc --project .
 tsfmt --verify
 tslint --project .
 popd
 
 # Integration test
-pushd static
+pushd ui
 yarn test
-popd static
+popd
