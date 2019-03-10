@@ -1,8 +1,8 @@
 let logArea: HTMLTextAreaElement;
-let coordInput: HTMLInputElement;
 let formulaInput: HTMLInputElement;
 let formulaFieldSet: HTMLFieldSetElement;
 let formulaForm: HTMLFormElement;
+let selectedCell: HTMLTableCellElement;
 
 enum Key {
     ENTER = 13,
@@ -15,23 +15,14 @@ enum Key {
 
 // Handler for clicking on cells.
 function onSelectCell(event: Event) {
-    const newCell: JQuery<Element> = $(event.target as Element);
-    const newCoord = newCell.prop("id");
+    const previousCell = selectedCell;
+    selectedCell = event.target as HTMLTableCellElement;
 
-    // Get old coordinate and set new coordinate.
-    const oldCoord: string = coordInput.value;
-    coordInput.value = newCoord;
+    previousCell.classList.remove("table-primary");
+    selectedCell.classList.add("table-primary");
+    selectedCell.focus();
 
-    // Adjust highlighted cell.
-    if (oldCoord !== "") {
-        $("#" + oldCoord).removeClass("table-primary");
-    }
-    newCell.addClass("table-primary");
-    newCell.focus();
-
-    // Copy cell value into input field.
-    formulaInput.value = newCell.attr("data-formula")!;
-
+    formulaInput.value = selectedCell.dataset.formula!;
     formulaFieldSet.disabled = true;
 }
 
@@ -78,10 +69,6 @@ function onKeydownCell(event: any) {
     $("#" + newCoord).click();
 }
 
-function selectedCell(): HTMLTableCellElement {
-    return document.querySelector("#" + coordInput.value) as HTMLTableCellElement;
-}
-
 function log(msg: string) {
     logArea.value += "\n" + msg;
     logArea.scrollTop = logArea.scrollHeight;
@@ -100,11 +87,11 @@ else {
 
 function initialize() {
     const sheetTable: HTMLTableElement = document.querySelector("#sheet") as HTMLTableElement;
+    selectedCell = document.querySelector("#A1") as HTMLTableCellElement;
 
     logArea = document.querySelector("#log") as HTMLTextAreaElement;
     const clearButton: Element = document.querySelector("#clear")!;
 
-    coordInput = document.querySelector("#coord") as HTMLInputElement;
     formulaInput = document.querySelector("#formula") as HTMLInputElement;
     formulaFieldSet = document.querySelector("#formula_fieldset") as HTMLFieldSetElement;
     formulaForm = document.querySelector("#formula_form") as HTMLFormElement;
@@ -127,16 +114,19 @@ function initialize() {
     formulaInput.addEventListener("keydown", (event) => {
         if (event.which === Key.ESCAPE) {
             event.preventDefault();
-            selectedCell().click();
+            selectedCell.click();
         }
     });
 
-    selectedCell().click();
+    selectedCell.click();
 
     formulaForm.addEventListener("submit", (event) => {
         event.preventDefault();
         $.ajax({
-            data: $(formulaForm).serializeArray(),
+            data: {
+                coord: selectedCell.id,
+                formula: formulaInput.value
+            },
             dataType: "json",
             method: "post",
             url: "update",
@@ -144,13 +134,14 @@ function initialize() {
         .done((data: Result<Log, string>) => {
           switch (data.kind) {
               case "Ok": {
-                  log("> " + coordInput.value + " = " + formulaInput.value);
+                  log("> " + selectedCell.id + " = " + formulaInput.value);
                   for (const entry of data.ok) {
-                      $("#" + entry.coord).text(entry.to);
+                      // TODO: Raise an error if the cell does not exist.
+                      (document.querySelector("#" + entry.coord) as HTMLTableCellElement).textContent = entry.to.toString();
                       log(entry.coord + " = " + entry.to);
                   }
-                  selectedCell().dataset.formula = formulaInput.value;
-                  selectedCell().click();
+                  selectedCell.dataset.formula = formulaInput.value;
+                  selectedCell.click();
                   break;
               }
               case "Err": {

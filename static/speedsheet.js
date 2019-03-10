@@ -1,9 +1,9 @@
 "use strict";
 var logArea;
-var coordInput;
 var formulaInput;
 var formulaFieldSet;
 var formulaForm;
+var selectedCell;
 var Key;
 (function (Key) {
     Key[Key["ENTER"] = 13] = "ENTER";
@@ -15,19 +15,12 @@ var Key;
 })(Key || (Key = {}));
 // Handler for clicking on cells.
 function onSelectCell(event) {
-    var newCell = $(event.target);
-    var newCoord = newCell.prop("id");
-    // Get old coordinate and set new coordinate.
-    var oldCoord = coordInput.value;
-    coordInput.value = newCoord;
-    // Adjust highlighted cell.
-    if (oldCoord !== "") {
-        $("#" + oldCoord).removeClass("table-primary");
-    }
-    newCell.addClass("table-primary");
-    newCell.focus();
-    // Copy cell value into input field.
-    formulaInput.value = newCell.attr("data-formula");
+    var previousCell = selectedCell;
+    selectedCell = event.target;
+    previousCell.classList.remove("table-primary");
+    selectedCell.classList.add("table-primary");
+    selectedCell.focus();
+    formulaInput.value = selectedCell.dataset.formula;
     formulaFieldSet.disabled = true;
 }
 function onEditCell(event) {
@@ -68,9 +61,6 @@ function onKeydownCell(event) {
     }
     $("#" + newCoord).click();
 }
-function selectedCell() {
-    return document.querySelector("#" + coordInput.value);
-}
 function log(msg) {
     logArea.value += "\n" + msg;
     logArea.scrollTop = logArea.scrollHeight;
@@ -86,9 +76,9 @@ else {
 }
 function initialize() {
     var sheetTable = document.querySelector("#sheet");
+    selectedCell = document.querySelector("#A1");
     logArea = document.querySelector("#log");
     var clearButton = document.querySelector("#clear");
-    coordInput = document.querySelector("#coord");
     formulaInput = document.querySelector("#formula");
     formulaFieldSet = document.querySelector("#formula_fieldset");
     formulaForm = document.querySelector("#formula_form");
@@ -107,14 +97,17 @@ function initialize() {
     formulaInput.addEventListener("keydown", function (event) {
         if (event.which === Key.ESCAPE) {
             event.preventDefault();
-            selectedCell().click();
+            selectedCell.click();
         }
     });
-    selectedCell().click();
+    selectedCell.click();
     formulaForm.addEventListener("submit", function (event) {
         event.preventDefault();
         $.ajax({
-            data: $(formulaForm).serializeArray(),
+            data: {
+                coord: selectedCell.id,
+                formula: formulaInput.value
+            },
             dataType: "json",
             method: "post",
             url: "update"
@@ -122,14 +115,15 @@ function initialize() {
             .done(function (data) {
             switch (data.kind) {
                 case "Ok": {
-                    log("> " + coordInput.value + " = " + formulaInput.value);
+                    log("> " + selectedCell.id + " = " + formulaInput.value);
                     for (var _i = 0, _a = data.ok; _i < _a.length; _i++) {
                         var entry = _a[_i];
-                        $("#" + entry.coord).text(entry.to);
+                        // TODO: Raise an error if the cell does not exist.
+                        document.querySelector("#" + entry.coord).textContent = entry.to.toString();
                         log(entry.coord + " = " + entry.to);
                     }
-                    selectedCell().dataset.formula = formulaInput.value;
-                    selectedCell().click();
+                    selectedCell.dataset.formula = formulaInput.value;
+                    selectedCell.click();
                     break;
                 }
                 case "Err": {
