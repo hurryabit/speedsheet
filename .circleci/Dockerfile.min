@@ -1,0 +1,11 @@
+FROM circleci/rust:1.33-stretch-node
+
+ENV RUST_VERSION=nightly-2019-03-10
+
+RUN set -eux; \
+    \
+    rustup toolchain install $RUST_VERSION; \
+    rustup default $RUST_VERSION; \
+    rustup --version; \
+    cargo --version; \
+    rustc --version;

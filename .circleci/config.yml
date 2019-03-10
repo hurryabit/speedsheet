@@ -1,0 +1,8 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: hurryabit/speedsheet:nightly-2019-03-10
+    steps:
+      - checkout
+      - run: ./test.sh
