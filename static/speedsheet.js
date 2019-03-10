@@ -89,7 +89,7 @@ function initialize() {
     formulaFieldSet = document.querySelector("#formula_fieldset");
     formulaForm = document.querySelector("#formula_form");
     // Set up log widget.
-    $(logArea).outerHeight($(sheetTable).outerHeight());
+    logArea.style.height = sheetTable.getBoundingClientRect().height.toString() + "px";
     clearLog();
     clearButton.addEventListener("click", function () { return clearLog(); });
     // Install handler for clicking on table cells.

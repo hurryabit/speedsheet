@@ -103,7 +103,7 @@ function initialize() {
     formulaForm = document.querySelector("#formula_form") as HTMLFormElement;
 
     // Set up log widget.
-    $(logArea).outerHeight($(sheetTable).outerHeight()!);
+    logArea.style.height = sheetTable.getBoundingClientRect().height.toString() + "px";
     clearLog();
     clearButton.addEventListener("click", () => clearLog());
 
