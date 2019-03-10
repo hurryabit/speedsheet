@@ -8,9 +8,7 @@ jobs:
 
       - restore_cache:
           keys:
-              - rust-nightly-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
-              - rust-nightly-2019-03-10-{{ arch }}-
-              - rust-nightly-2019-03-10-
+              - rust-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
       # NOTE: Since cargo does not provide a way to only build the
       # dependencies, we clean the artifacts from the previous build first.
       - run:
@@ -25,13 +23,14 @@ jobs:
       - run:
           name: Lint backend
           command: cargo clippy
-      - save_cache:
-          paths:
-              - target
-          key: rust-nightly-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Unit test backend
           command: cargo test
+      - save_cache:
+          paths:
+              - ~/.cargo
+              - target
+          key: rust-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
 
       - restore_cache:
           keys:
