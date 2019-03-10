@@ -11,7 +11,6 @@ use std::sync::Mutex;
 use std::vec::Vec;
 
 use rocket::response::Redirect;
-use rocket::request::Form;
 use rocket::State;
 
 use rocket_contrib::json::Json;
@@ -89,18 +88,18 @@ fn view(app_state: AppState) -> Template {
   Template::render("index", &app_view)
 }
 
-#[derive(FromForm)]
+#[derive(Deserialize)]
 struct UpdateParams {
   coord: String,
   formula: String,
 }
 
 #[post("/update", data="<params>")]
-fn update(app_state: AppState, params: Form<UpdateParams>) -> Json<ts::Result<Log, String>> {
+fn update(app_state: AppState, params: Json<UpdateParams>) -> Json<ts::Result<Log, String>> {
   Json(update_rs(app_state, params).to_ts())
 }
 
-fn update_rs(app_state: AppState, form: Form<UpdateParams>) -> Result<Log, String> {
+fn update_rs(app_state: AppState, form: Json<UpdateParams>) -> Result<Log, String> {
   let coord = form.coord.parse::<Coord>().map_err(|e| e.to_string())?;
   let expr = form.formula.parse::<Expr>().map_err(|e| e.to_string())?;
   let sheet = &mut app_state.lock().unwrap();

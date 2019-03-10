@@ -107,16 +107,14 @@ function initialize() {
     selectedCell.click();
     formulaForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        $.ajax({
-            data: {
-                coord: selectedCell.id,
-                formula: formulaInput.value
-            },
-            dataType: "json",
+        var body = { coord: selectedCell.id, formula: formulaInput.value };
+        fetch("/update", {
             method: "post",
-            url: "update"
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify(body)
         })
-            .done(function (data) {
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
             switch (data.kind) {
                 case "Ok": {
                     log("> " + selectedCell.id + " = " + formulaInput.value);
@@ -136,8 +134,9 @@ function initialize() {
                 }
                 default: impossible(data);
             }
-        })
-            .fail(function (xhr, status, error) { alert("Connection to server failed: " + error); });
+        })["catch"](function (error) {
+            alert("Connection to server failed: " + error);
+        });
     });
 }
 var Ok = /** @class */ (function () {

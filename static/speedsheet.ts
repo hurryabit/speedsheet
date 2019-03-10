@@ -125,36 +125,36 @@ function initialize() {
 
     formulaForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        $.ajax({
-            data: {
-                coord: selectedCell.id,
-                formula: formulaInput.value
-            },
-            dataType: "json",
+        let body = { coord: selectedCell.id, formula: formulaInput.value };
+        fetch("/update", {
             method: "post",
-            url: "update",
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify(body)
         })
-        .done((data: Result<Log, string>) => {
-          switch (data.kind) {
-              case "Ok": {
-                  log("> " + selectedCell.id + " = " + formulaInput.value);
-                  for (const entry of data.ok) {
-                      // TODO: Raise an error if the cell does not exist.
-                      (document.querySelector("#" + entry.coord) as HTMLTableCellElement).textContent = entry.to.toString();
-                      log(entry.coord + " = " + entry.to);
-                  }
-                  selectedCell.dataset.formula = formulaInput.value;
-                  selectedCell.click();
-                  break;
-              }
-              case "Err": {
-                  alert(data.err);
-                  break;
-              }
-              default: impossible(data);
-          }
+        .then(response => response.json())
+        .then((data : Result<Log, string>) => {
+            switch (data.kind) {
+                case "Ok": {
+                    log("> " + selectedCell.id + " = " + formulaInput.value);
+                    for (const entry of data.ok) {
+                        // TODO: Raise an error if the cell does not exist.
+                        (document.querySelector("#" + entry.coord) as HTMLTableCellElement).textContent = entry.to.toString();
+                        log(entry.coord + " = " + entry.to);
+                    }
+                    selectedCell.dataset.formula = formulaInput.value;
+                    selectedCell.click();
+                    break;
+                }
+                case "Err": {
+                    alert(data.err);
+                    break;
+                }
+                default: impossible(data);
+            }
         })
-        .fail((xhr, status, error) => { alert("Connection to server failed: " + error); });
+        .catch(error => {
+            alert("Connection to server failed: " + error);
+        });
     });
 }
 
