@@ -158,14 +158,6 @@ function initialize() {
     });
 }
 
-class Ok<T> {
-    public kind: "Ok" = "Ok";
-    public ok: T;
-    constructor(ok: T) {
-        this.ok = ok;
-    }
-}
-
 interface LogEntry {
   coord: string;
   from: number;
@@ -173,6 +165,14 @@ interface LogEntry {
 }
 
 type Log = Array<LogEntry>;
+
+class Ok<T> {
+    public kind: "Ok" = "Ok";
+    public ok: T;
+    constructor(ok: T) {
+        this.ok = ok;
+    }
+}
 
 class Err<E> {
     public kind: "Err" = "Err";
