@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+# Make sure Rust _looks_ fine
+cargo fmt -- --check
+cargo clippy
+
+# Make sure TypeScript _looks_ fine
+yarn checkfmt
+yarn lint

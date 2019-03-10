@@ -5,4 +5,33 @@ jobs:
       - image: hurryabit/speedsheet:nightly-2019-03-10
     steps:
       - checkout
-      - run: ./test.sh
+
+      - run:
+          name: Build backend
+          command: cargo build
+      - run:
+          name: Style check backend
+          command: cargo fmt -- --check
+      - run:
+          name: Lint backend
+          command: cargo clippy
+      - run:
+          name: Unit test backend
+          command: cargo test
+
+      - run:
+          name: Install frontend dependencies
+          command: yarn install
+      - run:
+          name: Build frontend
+          command: yarn build
+      - run:
+          name: Style check frontend
+          command: yarn checkfmt
+      - run:
+          name: Lint frontend
+          command: yarn lint
+
+      - run:
+          name: Integration test
+          command: NO_CHROME_SANDBOX=1 yarn test
