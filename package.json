@@ -2,9 +2,9 @@
   "name": "speedsheet",
   "version": "0.0.0",
   "description": "Never wait for your calculations again.",
+  "author": "Martin Huschenbett <martin.huschenbett@posteo.me",
   "license": "UNLICENSED",
   "main": "speedsheet.js",
-  "author": "Martin Huschenbett <martin.huschenbett@posteo.me",
   "dependencies": {},
   "devDependencies": {
     "@types/jquery": "^3.3.29",
@@ -19,7 +19,7 @@
     "build": "tsc --build",
     "checkfmt": "tsfmt --verify",
     "lint": "tslint --project .",
-    "test": "jest src/test.js",
+    "test": "jest",
     "watch": "tsc --watch"
   }
 }

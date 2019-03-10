@@ -8,13 +8,22 @@ let browser;
 
 beforeAll(async () => {
   let env = process.env;
+  let args = [];
+  if (env.NO_CHROME_SANDBOX === "1") {
+    console.error("Disabling Chrom sandbox. This is DANGEROUS!");
+    args = ["--no-sandbox"];
+  }
   env.ROCKET_PORT = port;
   server = spawn("cargo", ["run"], {
     env: env,
     stdio: "inherit",
   });
   await new Promise((resolve) => setTimeout(resolve, 500));
-  browser = await puppeteer.launch();
+  browser = await puppeteer.launch({ args: args })
+    .catch((error) => {
+      console.error(error);
+      Promise.reject(error);
+    });
 });
 
 afterAll(() => {
