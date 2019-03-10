@@ -6,22 +6,31 @@ let selectedCell: HTMLTableCellElement;
 
 // Handler for clicking on cells.
 function onSelectCell(event: Event) {
-    const previousCell = selectedCell;
-    selectedCell = event.target as HTMLTableCellElement;
+    const target = event.target as Element;
+    if (target.tagName === "TD") {
+        const previousCell = selectedCell;
+        selectedCell = target as HTMLTableCellElement;
 
-    previousCell.classList.remove("table-primary");
-    selectedCell.classList.add("table-primary");
-    selectedCell.focus();
+        previousCell.classList.remove("table-primary");
+        selectedCell.classList.add("table-primary");
+        selectedCell.focus();
 
-    formulaInput.value = selectedCell.dataset.formula!;
-    formulaFieldSet.disabled = true;
+        formulaInput.value = selectedCell.dataset.formula!;
+        formulaFieldSet.disabled = true;
+        return true;
+    }
+    else {
+        selectedCell.focus()
+        return false;
+    }
 }
 
 function onEditCell(event: Event) {
-    onSelectCell(event);
-    formulaFieldSet.disabled = false;
-    formulaInput.focus();
-    formulaInput.select();
+    if (onSelectCell(event)) {
+        formulaFieldSet.disabled = false;
+        formulaInput.focus();
+        formulaInput.select();
+    }
 }
 
 function onKeypressCell(event: KeyboardEvent) {
@@ -31,7 +40,7 @@ function onKeypressCell(event: KeyboardEvent) {
 }
 
 function onKeydownCell(event: KeyboardEvent) {
-    const oldCoord: string = (event.target as Element).id;
+    const oldCoord: string = selectedCell.id;
     let newCoord: string;
 
     switch (event.key) {
@@ -57,7 +66,10 @@ function onKeydownCell(event: KeyboardEvent) {
             return;
     }
 
-    $("#" + newCoord).click();
+    const nextCell = document.querySelector("#" + newCoord);
+    if (nextCell) {
+        (nextCell as HTMLElement).click();
+    }
 }
 
 function log(msg: string) {
@@ -93,13 +105,11 @@ function initialize() {
     clearButton.addEventListener("click", () => clearLog());
 
     // Install handler for clicking on table cells.
-    document.querySelectorAll("td").forEach((cell) => {
-        cell.tabIndex = -1;
-        cell.addEventListener("click", onSelectCell);
-        cell.addEventListener("dblclick", onEditCell);
-        cell.addEventListener("keypress", onKeypressCell);
-        cell.addEventListener("keydown", onKeydownCell);
-    });
+    document.querySelectorAll("td").forEach((cell) => cell.tabIndex = -1);
+    sheetTable.addEventListener("click", onSelectCell);
+    sheetTable.addEventListener("dblclick", onEditCell);
+    sheetTable.addEventListener("keypress", onKeypressCell);
+    sheetTable.addEventListener("keydown", onKeydownCell);
 
     formulaInput.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.key === "Escape") {

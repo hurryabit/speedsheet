@@ -6,19 +6,28 @@ var formulaForm;
 var selectedCell;
 // Handler for clicking on cells.
 function onSelectCell(event) {
-    var previousCell = selectedCell;
-    selectedCell = event.target;
-    previousCell.classList.remove("table-primary");
-    selectedCell.classList.add("table-primary");
-    selectedCell.focus();
-    formulaInput.value = selectedCell.dataset.formula;
-    formulaFieldSet.disabled = true;
+    var target = event.target;
+    if (target.tagName === "TD") {
+        var previousCell = selectedCell;
+        selectedCell = target;
+        previousCell.classList.remove("table-primary");
+        selectedCell.classList.add("table-primary");
+        selectedCell.focus();
+        formulaInput.value = selectedCell.dataset.formula;
+        formulaFieldSet.disabled = true;
+        return true;
+    }
+    else {
+        selectedCell.focus();
+        return false;
+    }
 }
 function onEditCell(event) {
-    onSelectCell(event);
-    formulaFieldSet.disabled = false;
-    formulaInput.focus();
-    formulaInput.select();
+    if (onSelectCell(event)) {
+        formulaFieldSet.disabled = false;
+        formulaInput.focus();
+        formulaInput.select();
+    }
 }
 function onKeypressCell(event) {
     if (event.key === "Enter") {
@@ -26,7 +35,7 @@ function onKeypressCell(event) {
     }
 }
 function onKeydownCell(event) {
-    var oldCoord = event.target.id;
+    var oldCoord = selectedCell.id;
     var newCoord;
     switch (event.key) {
         case "ArrowLeft": {
@@ -50,7 +59,10 @@ function onKeydownCell(event) {
         default:
             return;
     }
-    $("#" + newCoord).click();
+    var nextCell = document.querySelector("#" + newCoord);
+    if (nextCell) {
+        nextCell.click();
+    }
 }
 function log(msg) {
     logArea.value += "\n" + msg;
@@ -78,13 +90,11 @@ function initialize() {
     clearLog();
     clearButton.addEventListener("click", function () { return clearLog(); });
     // Install handler for clicking on table cells.
-    document.querySelectorAll("td").forEach(function (cell) {
-        cell.tabIndex = -1;
-        cell.addEventListener("click", onSelectCell);
-        cell.addEventListener("dblclick", onEditCell);
-        cell.addEventListener("keypress", onKeypressCell);
-        cell.addEventListener("keydown", onKeydownCell);
-    });
+    document.querySelectorAll("td").forEach(function (cell) { return cell.tabIndex = -1; });
+    sheetTable.addEventListener("click", onSelectCell);
+    sheetTable.addEventListener("dblclick", onEditCell);
+    sheetTable.addEventListener("keypress", onKeypressCell);
+    sheetTable.addEventListener("keydown", onKeydownCell);
     formulaInput.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
             event.preventDefault();
