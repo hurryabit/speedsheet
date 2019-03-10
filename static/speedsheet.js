@@ -3,6 +3,7 @@ var logArea;
 var formulaInput;
 var formulaFieldSet;
 var formulaForm;
+var sheetTable;
 var selectedCell;
 // Handler for clicking on cells.
 function onSelectCell(event) {
@@ -35,33 +36,35 @@ function onKeypressCell(event) {
     }
 }
 function onKeydownCell(event) {
-    var oldCoord = selectedCell.id;
-    var newCoord;
+    var selectedRow = selectedCell.parentNode;
+    var rowIndex = selectedRow.rowIndex;
+    var cellIndex = selectedCell.cellIndex;
     switch (event.key) {
         case "ArrowLeft": {
-            newCoord = String.fromCharCode(oldCoord.charCodeAt(0) - 1) + oldCoord.substring(1);
+            cellIndex -= 1;
             break;
         }
         case "ArrowUp": {
-            var row = parseInt(oldCoord.substring(1), 10);
-            newCoord = oldCoord.charAt(0) + (row - 1).toString();
+            rowIndex -= 1;
             break;
         }
         case "ArrowRight": {
-            newCoord = String.fromCharCode(oldCoord.charCodeAt(0) + 1) + oldCoord.substring(1);
+            cellIndex += 1;
             break;
         }
         case "ArrowDown": {
-            var row = parseInt(oldCoord.substring(1), 10);
-            newCoord = oldCoord.charAt(0) + (row + 1).toString();
+            rowIndex += 1;
             break;
         }
         default:
             return;
     }
-    var nextCell = document.querySelector("#" + newCoord);
-    if (nextCell) {
-        nextCell.click();
+    var nextRow = sheetTable.rows[rowIndex];
+    if (nextRow) {
+        var nextCell = nextRow.children[cellIndex];
+        if (nextCell) {
+            nextCell.click();
+        }
     }
 }
 function log(msg) {
@@ -78,7 +81,7 @@ else {
     initialize();
 }
 function initialize() {
-    var sheetTable = document.querySelector("#sheet");
+    sheetTable = document.querySelector("#sheet");
     selectedCell = document.querySelector("#A1");
     logArea = document.querySelector("#log");
     var clearButton = document.querySelector("#clear");

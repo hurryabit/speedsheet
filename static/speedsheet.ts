@@ -2,6 +2,7 @@ let logArea: HTMLTextAreaElement;
 let formulaInput: HTMLInputElement;
 let formulaFieldSet: HTMLFieldSetElement;
 let formulaForm: HTMLFormElement;
+let sheetTable: HTMLTableElement;
 let selectedCell: HTMLTableCellElement;
 
 // Handler for clicking on cells.
@@ -40,35 +41,37 @@ function onKeypressCell(event: KeyboardEvent) {
 }
 
 function onKeydownCell(event: KeyboardEvent) {
-    const oldCoord: string = selectedCell.id;
-    let newCoord: string;
+    const selectedRow = selectedCell.parentNode as HTMLTableRowElement;
+    let rowIndex = selectedRow.rowIndex;
+    let cellIndex = selectedCell.cellIndex;
 
     switch (event.key) {
         case "ArrowLeft": {
-          newCoord = String.fromCharCode(oldCoord.charCodeAt(0) - 1) + oldCoord.substring(1);
+          cellIndex -= 1;
           break;
         }
         case "ArrowUp": {
-          const row = parseInt(oldCoord.substring(1), 10);
-          newCoord = oldCoord.charAt(0) + (row - 1).toString();
+          rowIndex -= 1;
           break;
         }
         case "ArrowRight": {
-          newCoord = String.fromCharCode(oldCoord.charCodeAt(0) + 1) + oldCoord.substring(1);
+          cellIndex += 1;
           break;
         }
         case "ArrowDown": {
-          const row = parseInt(oldCoord.substring(1), 10);
-          newCoord = oldCoord.charAt(0) + (row + 1).toString();
+          rowIndex += 1;
           break;
         }
         default:
             return;
     }
 
-    const nextCell = document.querySelector("#" + newCoord);
-    if (nextCell) {
-        (nextCell as HTMLElement).click();
+    const nextRow = sheetTable.rows[rowIndex];
+    if (nextRow) {
+        const nextCell = nextRow.children[cellIndex];
+        if (nextCell) {
+            (nextCell as HTMLElement).click();
+        }
     }
 }
 
@@ -89,7 +92,7 @@ else {
 }
 
 function initialize() {
-    const sheetTable: HTMLTableElement = document.querySelector("#sheet") as HTMLTableElement;
+    sheetTable = document.querySelector("#sheet") as HTMLTableElement;
     selectedCell = document.querySelector("#A1") as HTMLTableCellElement;
 
     logArea = document.querySelector("#log") as HTMLTextAreaElement;
