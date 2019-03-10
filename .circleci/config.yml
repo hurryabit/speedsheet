@@ -6,6 +6,16 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          keys:
+              - rust-nightly-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
+              - rust-nightly-2019-03-10-{{ arch }}-
+              - rust-nightly-2019-03-10-
+      # NOTE: Since cargo does not provide a way to only build the
+      # dependencies, we clean the artifacts from the previous build first.
+      - run:
+          name: Clean backend
+          command: cargo clean --package speedsheet
       - run:
           name: Build backend
           command: cargo build
@@ -15,13 +25,25 @@ jobs:
       - run:
           name: Lint backend
           command: cargo clippy
+      - save_cache:
+          paths:
+              - target
+          key: rust-nightly-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Unit test backend
           command: cargo test
 
+      - restore_cache:
+          keys:
+              - yarn-1.13.0-{{ checksum "yarn.lock" }}
+              - yarn-1.13.0-
       - run:
           name: Install frontend dependencies
           command: yarn install
+      - save_cache:
+          paths:
+              - node_modules
+          key: yarn-1.13.0-{{ checksum "yarn.lock" }}
       - run:
           name: Build frontend
           command: yarn build
