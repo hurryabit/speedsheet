@@ -8,12 +8,12 @@ jobs:
 
       - restore_cache:
           keys:
-              - rust-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
+              - rust-2019-03-10-dirty-{{ arch }}-{{ checksum "Cargo.lock" }}
       # NOTE: Since cargo does not provide a way to only build the
       # dependencies, we clean the artifacts from the previous build first.
-      - run:
-          name: Clean backend
-          command: cargo clean --package speedsheet
+      # - run:
+      #     name: Clean backend
+      #     command: cargo clean --package speedsheet
       - run:
           name: Build backend
           command: cargo build
@@ -30,7 +30,7 @@ jobs:
           paths:
               - ~/.cargo
               - target
-          key: rust-2019-03-10-{{ arch }}-{{ checksum "Cargo.lock" }}
+          key: rust-2019-03-10-dirty-{{ arch }}-{{ checksum "Cargo.lock" }}
 
       - restore_cache:
           keys:
