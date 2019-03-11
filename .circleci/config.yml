@@ -2,18 +2,21 @@ version: 2
 jobs:
   build:
     docker:
-      - image: hurryabit/speedsheet:nightly-2019-03-10
+      - image: circleci/rust:1.33.0-stretch-node-browsers
     steps:
       - checkout
 
       - restore_cache:
           keys:
-              - rust-2019-03-10-dirty-{{ arch }}-{{ checksum "Cargo.lock" }}
-      # NOTE: Since cargo does not provide a way to only build the
-      # dependencies, we clean the artifacts from the previous build first.
-      # - run:
-      #     name: Clean backend
-      #     command: cargo clean --package speedsheet
+              - v1-cargo-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Install rust tools
+          command: |
+              RUST_TOOLCHAIN=$(cat rust-toolchain)
+              rustup toolchain install $RUST_TOOLCHAIN
+              rustup default $RUST_TOOLCHAIN
+              rustup component add rustfmt
+              rustup component add clippy
       - run:
           name: Build backend
           command: cargo build
@@ -29,8 +32,7 @@ jobs:
       - save_cache:
           paths:
               - ~/.cargo
-              - target
-          key: rust-2019-03-10-dirty-{{ arch }}-{{ checksum "Cargo.lock" }}
+          key: v1-cargo-{{ arch }}-{{ checksum "Cargo.lock" }}
 
       - restore_cache:
           keys:
