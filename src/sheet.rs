@@ -198,11 +198,33 @@ impl Sheet {
     }
 
     pub fn get(&self, coord: &Coord) -> &Cell {
-        &self.cells[coord.row as usize][coord.col as usize]
+        &self.cells[coord.row][coord.col]
     }
 
     fn get_mut(&mut self, coord: &Coord) -> &mut Cell {
-        &mut self.cells[coord.row as usize][coord.col as usize]
+        &mut self.cells[coord.row][coord.col]
+    }
+
+    /// Check that the coordinate exists in this sheet.
+    fn check_coord(&self, coord: &Coord) -> Result<(), String> {
+        if self
+            .cells
+            .get(coord.row)
+            .map_or(false, |cells| coord.col < cells.len())
+        {
+            Ok(())
+        } else {
+            Err(format!("Bad cell index: {}", coord))
+        }
+    }
+
+    /// Check that all cells referenced by the expression exist in this
+    /// sheet.
+    fn check_expr(&self, expr: &Expr) -> Result<(), String> {
+        for coord in &expr.vars() {
+            self.check_coord(coord)?;
+        }
+        Ok(())
     }
 
     fn eval(&self, expr: &Expr) -> i64 {
@@ -268,6 +290,8 @@ impl Sheet {
     }
 
     pub fn set(&mut self, coord: &Coord, expr: Expr) -> Result<Log, String> {
+        self.check_coord(&coord)?;
+        self.check_expr(&expr)?;
         let old_expr = self.replace_expr(coord, expr);
         let (res, log) = self.update_values(coord);
         match res {
