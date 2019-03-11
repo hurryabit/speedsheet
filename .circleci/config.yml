@@ -34,7 +34,6 @@ jobs:
           name: Save rust cache
           paths:
               - /usr/local/cargo/registry
-              - target
           key: rust-v3-{{ arch }}-{{ checksum "Cargo.lock" }}
 
       - restore_cache:
