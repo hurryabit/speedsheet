@@ -8,7 +8,7 @@ jobs:
 
       - restore_cache:
           keys:
-              - rust-v2-{{ arch }}-{{ checksum "Cargo.lock" }}
+              - rust-v3-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Install rust tools
           command: |
@@ -32,9 +32,8 @@ jobs:
       - save_cache:
           paths:
               - /usr/local/cargo/registry
-              - /usr/local/rustup/toolchains/nightly-*
-              - /usr/local/rustup/update-hashes/nightly-*
-          key: rust-v2-{{ arch }}-{{ checksum "Cargo.lock" }}
+              - target
+          key: rust-v3-{{ arch }}-{{ checksum "Cargo.lock" }}
 
       - restore_cache:
           keys:
