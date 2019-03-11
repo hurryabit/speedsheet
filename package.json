@@ -21,5 +21,6 @@
     "lint": "tslint --project .",
     "test": "jest",
     "watch": "tsc --watch"
-  }
+  },
+  "heroku-run-build-script": true
 }

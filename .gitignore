@@ -6,5 +6,6 @@
 **/*.rs.bk
 
 # JavaScript stuff
+/static/**/*.js
 /node_modules/
 yarn-error.log
