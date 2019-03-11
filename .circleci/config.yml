@@ -6,9 +6,6 @@ jobs:
     steps:
       - checkout
 
-      - restore_cache:
-          keys:
-              - rust-v3-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Install rust tools
           command: |
@@ -17,6 +14,10 @@ jobs:
               rustup default $RUST_TOOLCHAIN
               rustup component add rustfmt
               rustup component add clippy
+      - restore_cache:
+          name: Restore rust cache
+          keys:
+              - rust-v3-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Build backend
           command: cargo build
@@ -30,12 +31,14 @@ jobs:
           name: Unit test backend
           command: cargo test
       - save_cache:
+          name: Save rust cache
           paths:
               - /usr/local/cargo/registry
               - target
           key: rust-v3-{{ arch }}-{{ checksum "Cargo.lock" }}
 
       - restore_cache:
+          name: Restore node cache
           keys:
               - yarn-1.13.0-{{ checksum "yarn.lock" }}
               - yarn-1.13.0-
@@ -43,6 +46,7 @@ jobs:
           name: Install frontend dependencies
           command: yarn install
       - save_cache:
+          name: Save node cache
           paths:
               - node_modules
           key: yarn-1.13.0-{{ checksum "yarn.lock" }}
