@@ -1,3 +1,5 @@
+#![deny(clippy::all)]
+#![deny(warnings)]
 use crate::sheet::*;
 use pretty_assertions::assert_eq;
 use Expr::*;
@@ -119,7 +121,10 @@ mod helper {
         for &[x, y] in perms {
             let sheet = Sheet::new(1, 2);
             let coords = [c[x], c[y]];
-            println!("Testing {:?}", coords.iter().map(|c| c.to_string()));
+            println!(
+                "Testing {:?}",
+                coords.iter().map(std::string::ToString::to_string)
+            );
             run_test(sheet, coords);
         }
     }
