@@ -1,6 +1,8 @@
 # SpeedSheet [![CircleCI](https://circleci.com/gh/hurryabit/speedsheet/tree/master.svg?style=svg&circle-token=ac9025c30bdf4122797a0c082e0172f4dac615fa)](https://circleci.com/gh/hurryabit/speedsheet/tree/master)
 
-Never wait for your calculations again.
+Like a spreadsheet. But in fast.
+
+A running instance can be found at https://speed-sheet.herokuapp.com/.
 
 ## How to run it?
 

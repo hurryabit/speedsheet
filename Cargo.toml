@@ -2,6 +2,11 @@
 name = "speedsheet"
 version = "0.0.0"
 authors = ["Martin Huschenbett <martin.huschenbett@posteo.me>"]
+license = "Apache-2.0"
+description = "SpeedSheet. Like a spreadsheet. In fast."
+readme = "README.md"
+homepage = "https://github.com/hurryabit/speedsheet#readme"
+repository = "https://github.com/hurryabit/speedsheet"
 edition = "2018"
 build = "build.rs"
 
