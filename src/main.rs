@@ -1,5 +1,6 @@
 #![deny(clippy::all)]
 #![deny(warnings)]
+#![allow(ellipsis_inclusive_range_patterns)]
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use]
