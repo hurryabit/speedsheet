@@ -40,7 +40,6 @@ jobs:
           name: Restore node cache
           keys:
               - yarn-1.13.0-{{ checksum "yarn.lock" }}
-              - yarn-1.13.0-
       - run:
           name: Install frontend dependencies
           command: yarn install
