@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/rust:1.33.0-stretch-node-browsers
+      - image: circleci/rust:1.37.0-stretch-node-browsers
     steps:
       - checkout
 
