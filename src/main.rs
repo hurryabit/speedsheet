@@ -110,6 +110,14 @@ fn view(app_state: AppState) -> Template {
     Template::render("index", &app_view)
 }
 
+#[get("/view_json")]
+fn view_json(app_state: AppState) -> Json<AppView> {
+    let sheet = &app_state.lock().unwrap();
+    let sheet_view = SheetView::from_sheet(sheet);
+    let app_view = AppView { sheet_view };
+    Json(app_view)
+}
+
 #[derive(Deserialize)]
 struct UpdateParams {
     coord: String,
@@ -132,10 +140,13 @@ fn update_rs(app_state: AppState, form: Json<UpdateParams>) -> Result<Log, Strin
 fn rocket() -> rocket::Rocket {
     let sheet = Sheet::new(10, 6);
     let app_state = Mutex::new(sheet);
+    let cors_options = rocket_cors::CorsOptions::default();
+    let cors = cors_options.to_cors().unwrap();
     rocket::ignite()
-        .mount("/", routes![index, view, update])
+        .mount("/", routes![index, view, view_json, update])
         .mount("/static", StaticFiles::from("static"))
         .attach(Template::fairing())
+        .attach(cors)
         .manage(app_state)
 }
 
